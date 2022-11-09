@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">NMedia</string>
+    <string name="titleMain">NMedia!</string>
+    <string name="test_title">Нетология. Университет интернет-профессий</string>
+    <string name="test_date_published">21 мая в 18:36</string>
+    <string name="test_content">Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов.</string>
+    <string name="test_counter">123.4K</string>
+</resources>
