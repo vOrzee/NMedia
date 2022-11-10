@@ -24,7 +24,7 @@
         android:layout_marginEnd="@dimen/usual_margin"
         android:ellipsize="end"
         android:singleLine="true"
-        android:text="@string/test_title"
+        tools:text="@string/test_title"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/date_published"
         app:layout_constraintEnd_toStartOf="@+id/more_vert"
@@ -40,7 +40,7 @@
         android:layout_marginEnd="@dimen/usual_margin"
         android:ellipsize="end"
         android:singleLine="true"
-        android:text="@string/test_date_published"
+        tools:text="@string/test_date_published"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/avatar"
         app:layout_constraintEnd_toStartOf="@+id/more_vert"
@@ -73,7 +73,7 @@
         android:layout_marginEnd="@dimen/usual_margin"
         android:paddingVertical="@dimen/usual_margin"
         android:textSize="16sp"
-        android:text="@string/test_content"/>
+        tools:text="@string/test_content"/>
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier2"
@@ -99,7 +99,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/likes"
         app:layout_constraintStart_toEndOf="@+id/likes"
         android:layout_marginStart="@dimen/usual_margin"
-        android:text="@string/test_counter"/>
+        tools:text="@string/test_counter"/>
 
     <ImageButton
         android:id="@+id/share"
@@ -121,7 +121,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/share"
         app:layout_constraintStart_toEndOf="@+id/share"
         android:layout_marginStart="@dimen/usual_margin"
-        android:text="@string/test_counter"/>
+        tools:text="@string/test_counter"/>
 
     <TextView
         android:id="@+id/count_viewed"
@@ -131,7 +131,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/share"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="@dimen/usual_margin"
-        android:text="@string/test_counter"/>
+        tools:text="@string/test_counter"/>
 
     <ImageButton
         android:id="@+id/viewed"

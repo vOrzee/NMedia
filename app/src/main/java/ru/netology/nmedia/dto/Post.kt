@@ -1,8 +1,10 @@
 package ru.netology.nmedia.dto
 
+import android.icu.text.CaseMap.Title
+
 data class Post(
     val id: Long,
-    val author: String,
+    val title: String,
     val content: String,
     val published: String,
     var likedByMe: Boolean = false,
