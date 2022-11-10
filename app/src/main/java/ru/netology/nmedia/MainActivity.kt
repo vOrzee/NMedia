@@ -1,7 +1,7 @@
 package ru.netology.nmedia
 
 import android.os.Bundle
-import androidx.activity.*
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auxiliary.NumberTranslator
@@ -16,8 +16,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        subscribe()
+        setListeners()
+    }
 
-
+    private fun subscribe() {
         viewModel.data.observe(this) { post ->
             with(binding) {
                 title.text = post.title
@@ -32,14 +35,16 @@ class MainActivity : AppCompatActivity() {
                 share.setImageResource(
                     if (post.sharedByMe) R.drawable.ic_shared_24 else R.drawable.ic_baseline_share_24
                 )
-                binding.likes.setOnClickListener {
-                    viewModel.like()
-                }
-                binding.share.setOnClickListener {
-                    viewModel.share()
-                }
             }
         }
+    }
 
+    private fun setListeners() {
+        binding.likes.setOnClickListener {
+            viewModel.like()
+        }
+        binding.share.setOnClickListener {
+            viewModel.share()
+        }
     }
 }
