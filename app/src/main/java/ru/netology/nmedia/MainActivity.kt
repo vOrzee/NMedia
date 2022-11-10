@@ -6,13 +6,14 @@ import android.widget.ImageButton
 import ru.netology.nmedia.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-    val binding = ActivityMainBinding.inflate(layoutInflater)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        findViewById<ImageButton>(R.id.likes).setOnClickListener {
-            (it as ImageButton).setImageResource(R.drawable.ic_liked_24)
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.likes.setOnClickListener {
+            binding.likes.setImageResource(R.drawable.ic_liked_24)
         }
     }
 }
