@@ -19,12 +19,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val adapter = PostAdapter (
-            onLikeListener = {viewModel.likeById(it.id)},
-            onShareListener = {viewModel.shareById(it.id)}
+        val adapter = PostAdapter(
+            onLikeListener = { viewModel.likeById(it.id) },
+            onShareListener = { viewModel.shareById(it.id) }
         )
         binding.list.adapter = adapter
-        viewModel.data.observe(this){ posts ->
+        viewModel.data.observe(this) { posts ->
             adapter.submitList(posts)
         }
     }

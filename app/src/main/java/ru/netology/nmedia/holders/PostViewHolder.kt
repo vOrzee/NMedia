@@ -12,7 +12,7 @@ class PostViewHolder(
     private val binding: CardPostBinding,
     private val onLikeListener: OnLikeListener,
     private val onShareListener: OnShareListener
-): RecyclerView.ViewHolder(binding.root) {
+) : RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
         with(binding) {
             title.text = post.title
@@ -24,13 +24,13 @@ class PostViewHolder(
             likes.setImageResource(
                 if (post.likedByMe) R.drawable.ic_liked_24 else R.drawable.ic_sharp_favorite_24
             )
-            likes.setOnClickListener{
+            likes.setOnClickListener {
                 onLikeListener(post)
             }
             share.setImageResource(
                 if (post.sharedByMe) R.drawable.ic_shared_24 else R.drawable.ic_baseline_share_24
             )
-            share.setOnClickListener{
+            share.setOnClickListener {
                 onShareListener(post)
             }
         }
