@@ -1,18 +1,17 @@
 package ru.netology.nmedia.holders
 
-import android.content.DialogInterface.OnClickListener
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapters.OnLikeListener
-//import ru.netology.nmedia.adapters.OnShareListener
+import ru.netology.nmedia.adapters.OnShareListener
 import ru.netology.nmedia.auxiliary.NumberTranslator
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.repository.PostRepositoryInMemoryImpl
 
 class PostViewHolder(
     private val binding: CardPostBinding,
-    private val onLikeListener: OnLikeListener
+    private val onLikeListener: OnLikeListener,
+    private val onShareListener: OnShareListener
 ): RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
         with(binding) {
@@ -31,6 +30,9 @@ class PostViewHolder(
             share.setImageResource(
                 if (post.sharedByMe) R.drawable.ic_shared_24 else R.drawable.ic_baseline_share_24
             )
+            share.setOnClickListener{
+                onShareListener(post)
+            }
         }
     }
 }
