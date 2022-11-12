@@ -24,13 +24,13 @@
         android:layout_marginEnd="@dimen/usual_margin"
         android:ellipsize="end"
         android:singleLine="true"
-        tools:text="@string/test_title"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/date_published"
         app:layout_constraintEnd_toStartOf="@+id/more_vert"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/avatar"
-        app:layout_constraintTop_toTopOf="@+id/avatar" />
+        app:layout_constraintTop_toTopOf="@+id/avatar"
+        tools:text="@string/test_title" />
 
     <TextView
         android:id="@+id/date_published"
@@ -40,13 +40,13 @@
         android:layout_marginEnd="@dimen/usual_margin"
         android:ellipsize="end"
         android:singleLine="true"
-        tools:text="@string/test_date_published"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/avatar"
         app:layout_constraintEnd_toStartOf="@+id/more_vert"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/avatar"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        tools:text="@string/test_date_published" />
 
     <ImageButton
         android:id="@+id/more_vert"
@@ -68,12 +68,12 @@
         android:id="@+id/content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/barrier1"
         android:layout_marginStart="@dimen/usual_margin"
         android:layout_marginEnd="@dimen/usual_margin"
         android:paddingVertical="@dimen/usual_margin"
         android:textSize="16sp"
-        tools:text="@string/test_content"/>
+        app:layout_constraintTop_toBottomOf="@+id/barrier1"
+        tools:text="@string/test_content" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier2"
@@ -86,63 +86,63 @@
         android:id="@+id/likes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/barrier2"
-        android:background="@android:color/transparent"
         android:layout_marginTop="@dimen/usual_margin"
-        app:srcCompat="@drawable/ic_sharp_favorite_24"/>
+        android:background="@android:color/transparent"
+        app:layout_constraintTop_toBottomOf="@+id/barrier2"
+        app:srcCompat="@drawable/ic_sharp_favorite_24" />
 
     <TextView
         android:id="@+id/count_likes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@+id/likes"
+        android:layout_marginStart="@dimen/usual_margin"
         app:layout_constraintBottom_toBottomOf="@+id/likes"
         app:layout_constraintStart_toEndOf="@+id/likes"
-        android:layout_marginStart="@dimen/usual_margin"
-        tools:text="@string/test_counter"/>
+        app:layout_constraintTop_toTopOf="@+id/likes"
+        tools:text="@string/test_counter" />
 
     <ImageButton
         android:id="@+id/share"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/barrier2"
+        android:layout_marginStart="@dimen/usual_margin"
+        android:layout_marginTop="@dimen/usual_margin"
+        android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="@+id/count_likes"
         app:layout_constraintStart_toEndOf="@+id/count_likes"
-        android:background="@android:color/transparent"
-        android:layout_marginTop="@dimen/usual_margin"
-        android:layout_marginStart="@dimen/usual_margin"
-        app:srcCompat="@drawable/ic_baseline_share_24"/>
+        app:layout_constraintTop_toBottomOf="@+id/barrier2"
+        app:srcCompat="@drawable/ic_baseline_share_24" />
 
     <TextView
         android:id="@+id/count_share"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@+id/share"
+        android:layout_marginStart="@dimen/usual_margin"
         app:layout_constraintBottom_toBottomOf="@+id/share"
         app:layout_constraintStart_toEndOf="@+id/share"
-        android:layout_marginStart="@dimen/usual_margin"
-        tools:text="@string/test_counter"/>
+        app:layout_constraintTop_toTopOf="@+id/share"
+        tools:text="@string/test_counter" />
 
     <TextView
         android:id="@+id/count_viewed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@+id/share"
+        android:layout_marginStart="@dimen/usual_margin"
         app:layout_constraintBottom_toBottomOf="@+id/share"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="@dimen/usual_margin"
-        tools:text="@string/test_counter"/>
+        app:layout_constraintTop_toTopOf="@+id/share"
+        tools:text="@string/test_counter" />
 
     <ImageButton
         android:id="@+id/viewed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/barrier2"
-        app:layout_constraintBottom_toBottomOf="@+id/count_likes"
-        app:layout_constraintEnd_toStartOf="@+id/count_viewed"
-        android:background="@android:color/transparent"
         android:layout_marginTop="@dimen/usual_margin"
         android:layout_marginEnd="@dimen/usual_margin"
-        app:srcCompat="@drawable/ic_baseline_remove_red_eye_24"/>
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="@+id/count_likes"
+        app:layout_constraintEnd_toStartOf="@+id/count_viewed"
+        app:layout_constraintTop_toBottomOf="@+id/barrier2"
+        app:srcCompat="@drawable/ic_baseline_remove_red_eye_24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
