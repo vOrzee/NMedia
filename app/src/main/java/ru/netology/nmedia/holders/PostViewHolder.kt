@@ -17,18 +17,15 @@ class PostViewHolder(
             title.text = post.title
             datePublished.text = post.published
             content.text = post.content
-            countLikes.text = NumberTranslator.translateNumber(post.countLikes)
-            countShare.text = NumberTranslator.translateNumber(post.countShared)
-            countViewed.text = NumberTranslator.translateNumber(post.countViews)
-            likes.setImageResource(
-                if (post.likedByMe) R.drawable.ic_liked_24 else R.drawable.ic_sharp_favorite_24
-            )
-            likes.setOnClickListener {
+            like.text = NumberTranslator.translateNumber(post.countLikes)
+            like.isChecked = post.likedByMe
+            share.text = NumberTranslator.translateNumber(post.countShared)
+            share.isChecked = post.sharedByMe
+            view.text = NumberTranslator.translateNumber(post.countViews)
+            view.isChecked = post.viewedByMe
+            like.setOnClickListener {
                 onInteractionListener.onLike(post)
             }
-            share.setImageResource(
-                if (post.sharedByMe) R.drawable.ic_shared_24 else R.drawable.ic_baseline_share_24
-            )
             share.setOnClickListener {
                 onInteractionListener.onShare(post)
             }

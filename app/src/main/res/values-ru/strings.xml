@@ -14,4 +14,5 @@
     <string name="post_menu_remove">Удалить</string>
     <string name="post_text_title">Заголовок</string>
     <string name="post_text_time">Только что</string>
+    <string name="avatar">avatar</string>
 </resources>
