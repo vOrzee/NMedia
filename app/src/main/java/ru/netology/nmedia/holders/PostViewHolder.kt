@@ -1,5 +1,8 @@
 package ru.netology.nmedia.holders
 
+import android.content.Intent
+import android.net.Uri
+import android.view.View
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
@@ -29,9 +32,17 @@ class PostViewHolder(
             share.setOnClickListener {
                 onInteractionListener.onShare(post)
             }
-
+            if (!post.videoUrl.isNullOrBlank()) {
+                videoContent.visibility = View.VISIBLE
+                playButtonVideoPost.setOnClickListener {
+                    onInteractionListener.onPlayVideo(post)
+                }
+            }   else {
+                videoContent.visibility = View.GONE
+            }
             moreVert.setOnClickListener {
-                PopupMenu(it.context, it).apply {
+                val popupMenu = PopupMenu(it.context, it)
+                popupMenu.apply {
                     inflate(R.menu.options_post)
                     setOnMenuItemClickListener { item ->
                         when (item.itemId) {
@@ -49,6 +60,9 @@ class PostViewHolder(
                         }
                     }
                 }.show()
+                popupMenu.setOnDismissListener {
+                    moreVert.isChecked = false
+                }
             }
         }
     }
