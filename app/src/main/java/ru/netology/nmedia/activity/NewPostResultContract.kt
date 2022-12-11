@@ -7,13 +7,20 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContract
 
-class NewPostResultContract : ActivityResultContract<Unit, String?>() {
-    override fun createIntent(context: Context, input: Unit): Intent =
-        Intent(context, NewPostActivity::class.java)
+var POST_TEXT: String = "post text input"
+
+class NewPostResultContract() : ActivityResultContract<String?, String?>() {
+    override fun createIntent(context: Context, input: String?): Intent {
+        val intent = Intent(context, NewPostActivity::class.java)
+        if (!input.isNullOrBlank()){
+            intent.putExtra(POST_TEXT,input)
+        }
+        return intent
+    }
 
     override fun parseResult(resultCode: Int, intent: Intent?): String? =
         if (resultCode == Activity.RESULT_OK) {
-            intent?.getStringExtra(Intent.EXTRA_TEXT)
+            intent?.getStringExtra(POST_TEXT)
         } else {
             null
         }

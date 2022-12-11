@@ -76,7 +76,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
 
     override fun save(post: Post) {
         if (post.id == 0L && post.content.isNotEmpty()) {
-            posts = listOf(
+            posts = posts +listOf(
                 post.copy(
                     id = nextId++,
                     title = "Me",
@@ -85,7 +85,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
                     sharedByMe = false,
                     viewedByMe = false
                 )
-            ) + posts
+            )
             data.value = posts
             return
         }

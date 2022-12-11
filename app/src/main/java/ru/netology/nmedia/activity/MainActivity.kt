@@ -12,69 +12,71 @@ import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auxiliary.AndroidUtils
 import ru.netology.nmedia.databinding.ActivityMainBinding
+import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class MainActivity : AppCompatActivity() {
     private val viewModel: PostViewModel by viewModels()
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-    private val interactionListener = object : OnInteractionListener {
+
+    private val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
+        result ?: return@registerForActivityResult
+        viewModel.changeContent(result)
+        viewModel.save()
+    }
+    private val adapter = PostAdapter(object : OnInteractionListener {
         override fun onLike(post: Post) {
             viewModel.likeById(post.id)
         }
 
         override fun onShare(post: Post) {
-            viewModel.shareById(post.id)
             val intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TEXT, post.content)
                 type = "text/plain"
             }
-            startActivity(intent)
-            val shareIntent =
-                Intent.createChooser(intent,getString(R.string.titleMain))
+
+            val shareIntent = Intent.createChooser(intent, "Share post")
             startActivity(shareIntent)
+            viewModel.shareById(post.id)
+        }
+
+        override fun onEdit(post: Post) {
+            viewModel.edit(post)
+            newPostLauncher.launch(post.content)
         }
 
         override fun onRemove(post: Post) {
             viewModel.removeById(post.id)
         }
 
-        override fun onEdit(post: Post) {
-            viewModel.edit(post)
-        }
-    }
+    })
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        val adapter = PostAdapter(interactionListener)
         binding.list.adapter = adapter
         viewModel.data.observe(this) { posts ->
             adapter.submitList(posts)
         }
 
-//        viewModel.edited.observe(this) { post ->
-//            if (post.id == 0L) {
-//                return@observe
-//            }
-//            with(binding.saveTextField) {
-//                requestFocus()
-//                setText(post.content)
-//            }
-//        }
-        val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
-            result ?: return@registerForActivityResult
-            viewModel.changeContent(result)
-            viewModel.save()
-        }
-
         binding.fab.setOnClickListener {
-            newPostLauncher.launch()
+            newPostLauncher.launch(null)
         }
 
+        binding.list.adapter = adapter
+        viewModel.data.observe(this) { posts ->
+            adapter.submitList(posts)
+        }
+
+        viewModel.edited.observe(this) { post ->
+            if (post.id == 0L) {
+                return@observe
+            }
+        }
 //        binding.saveButton.setOnClickListener {
 //            with(binding.saveTextField) {
 //                if (text.isNullOrBlank()) {

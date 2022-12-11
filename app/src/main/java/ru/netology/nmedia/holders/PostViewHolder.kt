@@ -36,10 +36,12 @@ class PostViewHolder(
                     setOnMenuItemClickListener { item ->
                         when (item.itemId) {
                             R.id.remove -> {
+                                moreVert.isChecked = false
                                 onInteractionListener.onRemove(post)
                                 true
                             }
                             R.id.edit -> {
+                                moreVert.isChecked = false
                                 onInteractionListener.onEdit(post)
                                 true
                             }
