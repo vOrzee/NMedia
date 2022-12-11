@@ -15,4 +15,5 @@
     <string name="post_text_title">Заголовок</string>
     <string name="post_text_time">Только что</string>
     <string name="avatar">avatar</string>
+    <string name="add">Add</string>
 </resources>

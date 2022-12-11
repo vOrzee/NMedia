@@ -15,4 +15,5 @@
     <string name="post_text_title">Title</string>
     <string name="post_text_time">Now</string>
     <string name="avatar">avatar</string>
+    <string name="add">Add</string>
 </resources>
