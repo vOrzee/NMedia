@@ -5,75 +5,83 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".activity.MainActivity">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@id/barrierDown"
         app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/card_post" />
 
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrierDown"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:src="@drawable/ic_baseline_add_24"
+        android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:barrierDirection="top"
-        app:constraint_referenced_ids="save_text_field, save_button" />
-
-    <EditText
-        android:id="@+id/save_text_field"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:hint="@string/edit_text_hint"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine"
-        android:padding="@dimen/usual_margin"
+        android:layout_margin="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/save_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/barrierDown" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <ImageButton
-        android:id="@+id/save_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="@dimen/usual_margin"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/description_button_confirm"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/save_text_field"
-        app:srcCompat="@drawable/ic_check_circle_24" />
+<!--    <androidx.constraintlayout.widget.Barrier-->
+<!--        android:id="@+id/barrierDown"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:barrierDirection="top"-->
+<!--        app:constraint_referenced_ids="save_text_field, save_button" />-->
 
-    <TextView
-        android:id="@+id/description_by_back"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:background="@color/purple_700"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine"
-        android:padding="@dimen/usual_margin"
-        android:text="@string/description_by_back_text"
-        android:textColor="@color/purple_200"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/barrierDown"
-        app:layout_constraintEnd_toStartOf="@id/back_button" />
+<!--    <EditText-->
+<!--        android:id="@+id/save_text_field"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="@android:color/transparent"-->
+<!--        android:hint="@string/edit_text_hint"-->
+<!--        android:importantForAutofill="no"-->
+<!--        android:inputType="textMultiLine"-->
+<!--        android:padding="@dimen/usual_margin"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toStartOf="@id/save_button"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="@id/barrierDown" />-->
 
-    <ImageButton
-        android:id="@+id/back_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="@dimen/usual_margin"
-        android:background="@color/purple_700"
-        android:contentDescription="@string/description_button_back"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/barrierDown"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_cancel_circle_24" />
+<!--    <ImageButton-->
+<!--        android:id="@+id/save_button"-->
+<!--        android:layout_width="48dp"-->
+<!--        android:layout_height="48dp"-->
+<!--        android:layout_marginTop="@dimen/usual_margin"-->
+<!--        android:background="@android:color/transparent"-->
+<!--        android:contentDescription="@string/description_button_confirm"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toEndOf="@id/save_text_field"-->
+<!--        app:srcCompat="@drawable/ic_check_circle_24" />-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/description_by_back"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="48dp"-->
+<!--        android:background="@color/purple_700"-->
+<!--        android:importantForAutofill="no"-->
+<!--        android:inputType="textMultiLine"-->
+<!--        android:padding="@dimen/usual_margin"-->
+<!--        android:text="@string/description_by_back_text"-->
+<!--        android:textColor="@color/purple_200"-->
+<!--        android:visibility="gone"-->
+<!--        app:layout_constraintBottom_toBottomOf="@id/barrierDown"-->
+<!--        app:layout_constraintEnd_toStartOf="@id/back_button" />-->
+
+<!--    <ImageButton-->
+<!--        android:id="@+id/back_button"-->
+<!--        android:layout_width="48dp"-->
+<!--        android:layout_height="48dp"-->
+<!--        android:layout_marginTop="@dimen/usual_margin"-->
+<!--        android:background="@color/purple_700"-->
+<!--        android:contentDescription="@string/description_button_back"-->
+<!--        android:visibility="gone"-->
+<!--        app:layout_constraintBottom_toTopOf="@id/barrierDown"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:srcCompat="@drawable/ic_cancel_circle_24" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
