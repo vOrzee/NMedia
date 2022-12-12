@@ -1,18 +1,15 @@
-package ru.netology.nmedia.holders
+package ru.netology.nmedia.adapters
 
-import android.content.Intent
-import android.net.Uri
 import android.view.View
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
-import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.auxiliary.NumberTranslator
-import ru.netology.nmedia.databinding.CardPostBinding
+import ru.netology.nmedia.databinding.FragmentCardPostBinding
 import ru.netology.nmedia.dto.Post
 
 class PostViewHolder(
-    private val binding: CardPostBinding,
+    private val binding: FragmentCardPostBinding,
     private val onInteractionListener: OnInteractionListener
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {

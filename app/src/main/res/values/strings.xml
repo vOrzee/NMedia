@@ -16,4 +16,5 @@
     <string name="post_text_time">Now</string>
     <string name="avatar">avatar</string>
     <string name="add">Add</string>
+    <string name="chooser_share_post">My app for your share</string>
 </resources>

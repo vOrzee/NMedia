@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.viewmodel.PostRepository
 
 class PostRepositorySharedPrefsImpl(
     context: Context,
