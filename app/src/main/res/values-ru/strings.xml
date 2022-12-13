@@ -14,7 +14,7 @@
     <string name="post_menu_remove">Удалить</string>
     <string name="post_text_title">Заголовок</string>
     <string name="post_text_time">Только что</string>
-    <string name="avatar">avatar</string>
-    <string name="add">Add</string>
-    <string name="chooser_share_post">My app for your share</string>
+    <string name="avatar">Аватар</string>
+    <string name="add">Добавить</string>
+    <string name="chooser_share_post">Куда экспортировать текст из поста</string>
 </resources>

@@ -6,7 +6,7 @@ import ru.netology.nmedia.dto.Post
 
 
 class PostRepositoryInMemoryImpl : PostRepository {
-    var nextId: Long = 1L
+    private var nextId: Long = 1L
     private var posts = listOf(
         Post(
             id = nextId++,
@@ -76,7 +76,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
 
     override fun save(post: Post) {
         if (post.id == 0L && post.content.isNotEmpty()) {
-            posts = posts +listOf(
+            posts = posts + listOf(
                 post.copy(
                     id = nextId++,
                     title = "Me",

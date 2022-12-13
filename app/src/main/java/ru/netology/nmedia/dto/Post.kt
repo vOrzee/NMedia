@@ -1,7 +1,5 @@
 package ru.netology.nmedia.dto
 
-import android.icu.text.CaseMap.Title
-
 data class Post(
     val id: Long,
     val title: String,
@@ -13,5 +11,5 @@ data class Post(
     val countLikes: Int = 9_999,
     val countShared: Int = 999,
     val countViews: Int = 99_999,
-    val videoUrl:String? = null
+    val videoUrl: String? = null
 )

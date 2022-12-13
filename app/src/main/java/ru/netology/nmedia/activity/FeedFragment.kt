@@ -28,7 +28,7 @@ class FeedFragment : Fragment() {
 
         val viewModel: PostViewModel by viewModels(::requireParentFragment)
 
-        val adaptor = PostAdapter(
+        val adapter = PostAdapter(
             object : OnInteractionListener {
                 override fun onLike(post: Post) {
                     viewModel.likeById(post.id)
@@ -52,7 +52,8 @@ class FeedFragment : Fragment() {
 
                 override fun onEdit(post: Post) {
                     viewModel.edit(post)
-                    findNavController().navigate(R.id.action_feedFragment_to_newPostFragment,
+                    findNavController().navigate(
+                        R.id.action_feedFragment_to_newPostFragment,
                         Bundle().apply {
                             textArg = post.content
                         })
@@ -66,7 +67,8 @@ class FeedFragment : Fragment() {
                 }
 
                 override fun onPreviewPost(post: Post) {
-                    findNavController().navigate(R.id.action_feedFragment_to_postFragment,
+                    findNavController().navigate(
+                        R.id.action_feedFragment_to_postFragment,
                         Bundle().apply {
                             longArg = post.id
                         })
@@ -74,15 +76,16 @@ class FeedFragment : Fragment() {
             }
         )
 
-        binding.list.adapter = adaptor
+        binding.list.adapter = adapter
 
         viewModel.data.observe(viewLifecycleOwner) { posts ->
-            adaptor.submitList(posts)
+            adapter.submitList(posts)
         }
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
+
         return binding.root
     }
 

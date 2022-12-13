@@ -11,16 +11,16 @@ class PostRepositorySharedPrefsImpl(
     context: Context,
 ) : PostRepository {
     private val gson = Gson()
-    private val prefs = context.getSharedPreferences("repo",Context.MODE_PRIVATE)
-    private val type = TypeToken.getParameterized(List::class.java,Post::class.java).type
+    private val prefs = context.getSharedPreferences("repo", Context.MODE_PRIVATE)
+    private val type = TypeToken.getParameterized(List::class.java, Post::class.java).type
     private val key = "posts"
     private var nextId = 1L
     private var posts = emptyList<Post>()
     private val data = MutableLiveData(posts)
 
     init {
-        prefs.getString(key,null)?.let {
-            posts = gson.fromJson(it,type)
+        prefs.getString(key, null)?.let {
+            posts = gson.fromJson(it, type)
             data.value = posts
         }
     }
@@ -69,7 +69,7 @@ class PostRepositorySharedPrefsImpl(
 
     override fun save(post: Post) {
         if (post.id == 0L && post.content.isNotEmpty()) {
-            posts = posts +listOf(
+            posts = posts + listOf(
                 post.copy(
                     id = nextId++,
                     title = "Me",

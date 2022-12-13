@@ -18,14 +18,16 @@ import ru.netology.nmedia.databinding.FragmentPostBinding
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class PostFragment : Fragment() {
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentPostBinding.inflate(layoutInflater)
 
+        val binding = FragmentPostBinding.inflate(layoutInflater)
         val viewModel: PostViewModel by viewModels(::requireParentFragment)
+
         with(binding.scrollContent) {
             viewModel.data.observe(viewLifecycleOwner) { posts ->
                 val post = posts.find { it.id == arguments?.longArg }
@@ -39,18 +41,17 @@ class PostFragment : Fragment() {
                     share.isChecked = post.sharedByMe
                     view.text = translateNumber(post.countViews)
                     view.isChecked = post.viewedByMe
-
                     if (!post.videoUrl.isNullOrBlank()) {
                         videoContent.visibility = View.VISIBLE
                     }   else {
                         videoContent.visibility = View.GONE
                     }
 
-                    like?.setOnClickListener {
+                    like.setOnClickListener {
                         viewModel.likeById(post.id)
                     }
 
-                    share?.setOnClickListener {
+                    share.setOnClickListener {
                         val intent = Intent().apply {
                             action = Intent.ACTION_SEND
                             type = "text/plain"
@@ -62,8 +63,9 @@ class PostFragment : Fragment() {
                         startActivity(shareIntent)
                     }
 
-                    moreVert?.setOnClickListener {
-                        PopupMenu(binding.root.context, binding.scrollContent.moreVert).apply {
+                    moreVert.setOnClickListener {
+                        val popupMenu = PopupMenu(binding.root.context, binding.scrollContent.moreVert)
+                        popupMenu.apply {
                             inflate(R.menu.options_post)
                             setOnMenuItemClickListener {
                                 when (it.itemId) {
@@ -84,6 +86,9 @@ class PostFragment : Fragment() {
                                 }
                             }
                         }.show()
+                        popupMenu.setOnDismissListener {
+                            moreVert.isChecked = false
+                        }
                     }
 
                     playButtonVideoPost.setOnClickListener {
