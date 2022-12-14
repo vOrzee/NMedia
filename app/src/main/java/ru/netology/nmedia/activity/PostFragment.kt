@@ -25,8 +25,6 @@ class PostFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        currentFragment = javaClass.simpleName
-
         val binding = FragmentPostBinding.inflate(layoutInflater)
         val viewModel: PostViewModel by viewModels(::requireParentFragment)
 
@@ -104,5 +102,10 @@ class PostFragment : Fragment() {
             }
         }
         return binding.root
+    }
+
+    override fun onStart() {
+        currentFragment = javaClass.simpleName
+        super.onStart()
     }
 }

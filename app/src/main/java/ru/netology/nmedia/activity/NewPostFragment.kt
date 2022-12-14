@@ -9,27 +9,26 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.activity.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.AndroidUtils.hideKeyboard
+import ru.netology.nmedia.auxiliary.AndroidUtils.showKeyboard
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
-import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.auxiliary.FloatingValue.textNewPost
+import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 
 class NewPostFragment : Fragment() {
 
     private val binding by lazy { FragmentNewPostBinding.inflate(layoutInflater) }
+    private val viewModel: PostViewModel by viewModels(::requireParentFragment)
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        currentFragment = javaClass.simpleName
-
-        val viewModel: PostViewModel by viewModels(::requireParentFragment)
         with(binding) {
 
-            arguments?.textArg?.let {
+            Bundle().textArg?.let {
                 edit.setText(it)
             }
 
@@ -37,7 +36,23 @@ class NewPostFragment : Fragment() {
                 edit.setText(textNewPost)
             }
 
-            edit.requestFocus() // с фрагментами почему-то не выходит програмно вызвать клавиатуру при создании фрагмента
+            edit.requestFocus()
+            showKeyboard(root)
+
+            clickListeners()
+
+            return root
+        }
+    }
+
+    override fun onStart() {
+        currentFragment = javaClass.simpleName
+        super.onStart()
+    }
+
+    private fun clickListeners() {
+        with(binding) {
+
             fabComplete.setOnClickListener {
                 if (!edit.text.isNullOrBlank()) {
                     val content = edit.text.toString()
@@ -59,7 +74,6 @@ class NewPostFragment : Fragment() {
                 findNavController().navigateUp()
             }
 
-            return root
         }
     }
 }

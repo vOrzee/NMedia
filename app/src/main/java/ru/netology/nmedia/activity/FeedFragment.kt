@@ -20,66 +20,67 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class FeedFragment : Fragment() {
+
+    val viewModel: PostViewModel by viewModels(::requireParentFragment)
+
+
+    private val interactionListener = object : OnInteractionListener {
+
+        override fun onLike(post: Post) {
+            viewModel.likeById(post.id)
+        }
+
+        override fun onShare(post: Post) {
+            viewModel.shareById(post.id)
+            val intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, post.content)
+            }
+
+            val shareIntent =
+                Intent.createChooser(intent, getString(R.string.chooser_share_post))
+            startActivity(shareIntent)
+        }
+
+        override fun onRemove(post: Post) {
+            viewModel.removeById(post.id)
+        }
+
+        override fun onEdit(post: Post) {
+            viewModel.edit(post)
+            findNavController().navigate(
+                R.id.action_feedFragment_to_newPostFragment,
+                Bundle().apply {
+                    textArg = post.content
+                })
+        }
+
+        override fun onPlayVideo(post: Post) {
+            val playIntent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoUrl))
+            if (playIntent.resolveActivity(requireContext().packageManager) != null) {
+                startActivity(playIntent)
+            }
+        }
+
+        override fun onPreviewPost(post: Post) {
+            findNavController().navigate(
+                R.id.action_feedFragment_to_postFragment,
+                Bundle().apply {
+                    longArg = post.id
+                })
+        }
+    }
+
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        currentFragment = javaClass.simpleName
 
         val binding = FragmentFeedBinding.inflate(layoutInflater)
-
-        val viewModel: PostViewModel by viewModels(::requireParentFragment)
-
-        val adapter = PostAdapter(
-            object : OnInteractionListener {
-                override fun onLike(post: Post) {
-                    viewModel.likeById(post.id)
-                }
-
-                override fun onShare(post: Post) {
-                    viewModel.shareById(post.id)
-                    val intent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, post.content)
-                    }
-
-                    val shareIntent =
-                        Intent.createChooser(intent, getString(R.string.chooser_share_post))
-                    startActivity(shareIntent)
-                }
-
-                override fun onRemove(post: Post) {
-                    viewModel.removeById(post.id)
-                    fillDefaultPostsIfThereAreNoPosts(viewModel)
-                }
-
-                override fun onEdit(post: Post) {
-                    viewModel.edit(post)
-                    findNavController().navigate(
-                        R.id.action_feedFragment_to_newPostFragment,
-                        Bundle().apply {
-                            textArg = post.content
-                        })
-                }
-
-                override fun onPlayVideo(post: Post) {
-                    val playIntent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoUrl))
-                    if (playIntent.resolveActivity(requireContext().packageManager) != null) {
-                        startActivity(playIntent)
-                    }
-                }
-
-                override fun onPreviewPost(post: Post) {
-                    findNavController().navigate(
-                        R.id.action_feedFragment_to_postFragment,
-                        Bundle().apply {
-                            longArg = post.id
-                        })
-                }
-            }
-        )
+        val adapter = PostAdapter(interactionListener)
 
         binding.list.adapter = adapter
 
@@ -93,16 +94,8 @@ class FeedFragment : Fragment() {
         return binding.root
     }
 
-    private fun fillDefaultPostsIfThereAreNoPosts(viewModel: PostViewModel) {
-        //Хотел через activity?.recreate() - оказалось плохая идея
-        if (viewModel.data.value.isNullOrEmpty()) {
-            val intent = Intent().apply {
-                action = "KEY_INTENT:734-68786151567"
-                type = "text/plain"
-                putExtra("noTypedRefSimpleModIntent", "nothing")
-            }
-            startActivity(intent)
-        }
+    override fun onResume() {
+        currentFragment = javaClass.simpleName
+        super.onResume()
     }
-
 }
