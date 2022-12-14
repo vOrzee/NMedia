@@ -13,6 +13,7 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.Companion.Companion.longArg
 import ru.netology.nmedia.activity.Companion.Companion.textArg
 import androidx.navigation.fragment.findNavController
+import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.NumberTranslator.translateNumber
 import ru.netology.nmedia.databinding.FragmentPostBinding
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -24,6 +25,7 @@ class PostFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        currentFragment = javaClass.simpleName
 
         val binding = FragmentPostBinding.inflate(layoutInflater)
         val viewModel: PostViewModel by viewModels(::requireParentFragment)

@@ -14,6 +14,7 @@ import ru.netology.nmedia.activity.Companion.Companion.longArg
 import ru.netology.nmedia.activity.Companion.Companion.textArg
 import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.adapters.PostAdapter
+import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -24,11 +25,11 @@ class FeedFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        currentFragment = javaClass.simpleName
+
         val binding = FragmentFeedBinding.inflate(layoutInflater)
 
         val viewModel: PostViewModel by viewModels(::requireParentFragment)
-
-        fillDefaultPostsIfThereAreNoPosts(viewModel)
 
         val adapter = PostAdapter(
             object : OnInteractionListener {
