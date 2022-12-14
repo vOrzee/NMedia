@@ -40,7 +40,7 @@ class PostViewHolder(
             share.setOnClickListener {
                 onInteractionListener.onShare(post)
             }
-            content.setOnClickListener {
+            postCard.setOnClickListener {
                 onInteractionListener.onPreviewPost(post)
             }
             playButtonVideoPost.setOnClickListener {

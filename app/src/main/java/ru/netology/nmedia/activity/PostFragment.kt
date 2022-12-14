@@ -43,7 +43,7 @@ class PostFragment : Fragment() {
                     view.isChecked = post.viewedByMe
                     if (!post.videoUrl.isNullOrBlank()) {
                         videoContent.visibility = View.VISIBLE
-                    }   else {
+                    } else {
                         videoContent.visibility = View.GONE
                     }
 
@@ -64,7 +64,8 @@ class PostFragment : Fragment() {
                     }
 
                     moreVert.setOnClickListener {
-                        val popupMenu = PopupMenu(binding.root.context, binding.scrollContent.moreVert)
+                        val popupMenu =
+                            PopupMenu(binding.root.context, binding.scrollContent.moreVert)
                         popupMenu.apply {
                             inflate(R.menu.options_post)
                             setOnMenuItemClickListener {

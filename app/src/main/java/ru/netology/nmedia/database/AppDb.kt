@@ -6,23 +6,23 @@ import ru.netology.nmedia.dao.PostColumns
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dao.PostDaoImpl
 
-class AppDb private constructor(db : SQLiteDatabase) {
+class AppDb private constructor(db: SQLiteDatabase) {
 
-    val postDao : PostDao = PostDaoImpl(db)
+    val postDao: PostDao = PostDaoImpl(db)
 
-    companion object{
+    companion object {
         @Volatile
         private var instance: AppDb? = null
 
-        fun getInstance(context : Context) : AppDb{
-            return instance ?: synchronized(this){
+        fun getInstance(context: Context): AppDb {
+            return instance ?: synchronized(this) {
                 instance ?: AppDb(
                     buildDatabase(context, arrayOf(PostColumns.DDL))
                 ).also { instance = it }
             }
         }
 
-        private fun buildDatabase(context: Context, DDLs : Array<String>) = DbHelper(
+        private fun buildDatabase(context: Context, DDLs: Array<String>) = DbHelper(
             context, 1, "app.db", DDLs,
         ).writableDatabase
     }

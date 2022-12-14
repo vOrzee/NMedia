@@ -28,6 +28,8 @@ class FeedFragment : Fragment() {
 
         val viewModel: PostViewModel by viewModels(::requireParentFragment)
 
+        fillDefaultPostsIfThereAreNoPosts(viewModel)
+
         val adapter = PostAdapter(
             object : OnInteractionListener {
                 override fun onLike(post: Post) {
@@ -35,6 +37,7 @@ class FeedFragment : Fragment() {
                 }
 
                 override fun onShare(post: Post) {
+                    viewModel.shareById(post.id)
                     val intent = Intent().apply {
                         action = Intent.ACTION_SEND
                         type = "text/plain"
@@ -48,6 +51,7 @@ class FeedFragment : Fragment() {
 
                 override fun onRemove(post: Post) {
                     viewModel.removeById(post.id)
+                    fillDefaultPostsIfThereAreNoPosts(viewModel)
                 }
 
                 override fun onEdit(post: Post) {
@@ -85,8 +89,19 @@ class FeedFragment : Fragment() {
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
-
         return binding.root
+    }
+
+    private fun fillDefaultPostsIfThereAreNoPosts(viewModel: PostViewModel) {
+        //Хотел через activity?.recreate() - оказалось плохая идея
+        if (viewModel.data.value.isNullOrEmpty()) {
+            val intent = Intent().apply {
+                action = "KEY_INTENT:734-68786151567"
+                type = "text/plain"
+                putExtra("noTypedRefSimpleModIntent", "nothing")
+            }
+            startActivity(intent)
+        }
     }
 
 }

@@ -45,22 +45,20 @@ class PostRepositoryInMemoryImpl : PostRepository {
     override fun getAll(): LiveData<List<Post>> = data
     override fun likeById(id: Long) {
         posts = posts.map {
-            if (it.id != id) it else {
-                val countLikes =
-                    if (it.likedByMe) (it.countLikes - 1) else (it.countLikes + 1)
-                it.copy(likedByMe = !it.likedByMe, countLikes = countLikes)
-            }
+            if (it.id != id) it else it.copy(
+                likedByMe = !it.likedByMe,
+                countLikes = if (it.likedByMe) (it.countLikes - 1) else (it.countLikes + 1)
+            )
         }
         data.value = posts
     }
 
     override fun shareById(id: Long) {
         posts = posts.map {
-            if (it.id != id) it else {
-                val countLikes =
-                    if (it.sharedByMe) (it.countShared - 1) else (it.countShared + 1)
-                it.copy(sharedByMe = !it.sharedByMe, countShared = countLikes)
-            }
+            if (it.id != id) it else it.copy(
+                sharedByMe = !it.sharedByMe,
+                countShared = if (it.sharedByMe) (it.countShared - 1) else (it.countShared + 1)
+            )
         }
         data.value = posts
     }
@@ -76,7 +74,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
 
     override fun save(post: Post) {
         if (post.id == 0L && post.content.isNotEmpty()) {
-            posts = posts + listOf(
+            posts = listOf(
                 post.copy(
                     id = nextId++,
                     title = "Me",
@@ -85,7 +83,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
                     sharedByMe = false,
                     viewedByMe = false
                 )
-            )
+            ) + posts
             data.value = posts
             return
         }

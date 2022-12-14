@@ -1,52 +1,90 @@
 package ru.netology.nmedia.dao
 
 object PostColumns {
-    const val TABLE = "posts"
+    const val TABLE_NAME = "posts"
     const val COLUMN_ID = "id"
-    const val COLUMN_TITLE  = "title"
+    const val COLUMN_TITLE = "title"
     const val COLUMN_CONTENT = "content"
     const val COLUMN_PUBLISHED = "published"
-    const val COLUMN_LIKED_BY_ME = "likeByMe"
+    const val COLUMN_LIKED_BY_ME = "likedByMe"
     const val COLUMN_LIKES = "likes"
+    const val COLUMN_SHARE_BY_ME = "sharedByMe"
+    const val COLUMN_SHARES = "shares"
+    const val COLUMN_VIEW_BY_ME = "viewByMe"
+    const val COLUMN_VIEWS = "view"
+    const val COLUMN_VIDEO_URL = "videoUrl"
     val ALL_COLUMNS = arrayOf(
         COLUMN_ID,
         COLUMN_TITLE,
-        COLUMN_CONTENT,
         COLUMN_PUBLISHED,
+        COLUMN_CONTENT,
         COLUMN_LIKED_BY_ME,
-        COLUMN_LIKES
+        COLUMN_LIKES,
+        COLUMN_SHARE_BY_ME,
+        COLUMN_SHARES,
+        COLUMN_VIEW_BY_ME,
+        COLUMN_VIEWS,
+        COLUMN_VIDEO_URL
     )
 
-    const val NAME = "posts"
     val DDL = """
-        CREATE TABLE $NAME (
-            ${Column.ID.columnName} INTEGER PRIMARY KEY AUTOINCREMENT,
-            ${Column.AUTHOR.columnName} TEXT NOT NULL,
-            ${Column.AUTHOR_AVATAR.columnName} TEXT NOT NULL,
-            ${Column.CONTENT.columnName} TEXT NOT NULL,
-            ${Column.PUBLISHED.columnName} TEXT NOT NULL,
-            ${Column.LIKED_BY_ME.columnName} BOOLEAN NOT NULL DEFAULT false,
-	        ${Column.LIKED_COUNT.columnName} INTEGER NOT NULL DEFAULT 0,
-	        ${Column.SHARED_COUNT.columnName} INTEGER NOT NULL DEFAULT 0,	
-	        ${Column.VIEWED_COUNT.columnName} INTEGER NOT NULL DEFAULT 0,	
-            ${Column.VIDEO_URL.columnName} TEXT
+        CREATE TABLE $TABLE_NAME (
+            $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            $COLUMN_TITLE TEXT NOT NULL DEFAULT "Какой-то заголовок",
+            $COLUMN_PUBLISHED TEXT NOT NULL DEFAULT "Только что",
+            $COLUMN_CONTENT TEXT NOT NULL,
+            $COLUMN_LIKED_BY_ME BOOLEAN NOT NULL DEFAULT false,
+            $COLUMN_LIKES INTEGER NOT NULL DEFAULT 0,
+	        $COLUMN_SHARE_BY_ME BOOLEAN NOT NULL DEFAULT false,
+	        $COLUMN_SHARES INTEGER NOT NULL DEFAULT 0,	
+	        $COLUMN_VIEW_BY_ME BOOLEAN NOT NULL DEFAULT false,
+	        $COLUMN_VIEWS INTEGER NOT NULL DEFAULT 0,		
+            $COLUMN_VIDEO_URL TEXT
         );
         """.trimIndent()
 
-//    val ALL_COLUMNS = Column.values()
-//        .map(Column::columnName)
-//        .toTypedArray()
+    val DEFAULT_POSTS = """                      
+        INSERT INTO $TABLE_NAME ($COLUMN_TITLE, $COLUMN_PUBLISHED, $COLUMN_CONTENT, $COLUMN_LIKES, $COLUMN_SHARES, $COLUMN_VIEWS, $COLUMN_VIDEO_URL) VALUES (
+            "Нетология. Университет интернет-профессий будущего",
+            "21 мая в 18:36",
+            "Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов.",
+            9999,
+            999,
+            99999,
+            null
+         ),(
+            "Нетология. Университет интернет-профессий будущего",
+            "18 сентября в 10:12",
+            "Знаний хватит на всех, на следующей неделе разбираемся с.. Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов.",
+            9999,
+            999,
+            99999,
+            null
+         ),(
+            "Нетология. Университет интернет-профессий будущего",
+            "19 сентября в 12:12",
+            "Третий пост. Знаний хватит на всех, на следующей неделе разбираемся с.. Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов.",
+            9999,
+            999,
+            99999,
+            null
+         ),(
+            "Нетология. Университет интернет-профессий будущего",
+            "20 сентября в 12:12",
+            "Четвёртый пост. Знаний хватит на всех, на следующей неделе разбираемся с.. Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов.",
+            9999,
+            999,
+            99999,
+            null
+         ),(
+            "Нетология. Университет интернет-профессий будущего",
+            "21 сентября в 12:12",
+            "Пятый пост. Знаний хватит на всех, на следующей неделе разбираемся с.. Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов.",
+            9999,
+            999,
+            99999,
+            "https://www.youtube.com/watch?v=ir0vFRaQ-Hw"
+         );
+    """.trimIndent()
 
-    enum class Column(val columnName : String){
-        ID("id"),
-        AUTHOR("author"),
-        AUTHOR_AVATAR("authorAvatar"),
-        CONTENT("content"),
-        PUBLISHED("published"),
-        LIKED_BY_ME("likedByMe"),
-        LIKED_COUNT("likedCount"),
-        SHARED_COUNT("sharedCount"),
-        VIEWED_COUNT("viewedCount"),
-        VIDEO_URL("videoURL"),
-    }
 }
