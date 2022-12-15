@@ -17,4 +17,7 @@
     <string name="avatar">Аватар</string>
     <string name="add">Добавить</string>
     <string name="chooser_share_post">Куда экспортировать текст из поста</string>
+    <string name="channel_remote_name">Название моего удалённого канала</string>
+    <string name="channel_remote_description">Описание удалённого канала</string>
+    <string name="notification_user_liked">%1$s поставил лайк посту %2$s</string>
 </resources>
