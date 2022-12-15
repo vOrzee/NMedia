@@ -33,8 +33,13 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        message.data[action]?.let {
-            when (Action.valueOf(it)) {
+        message.data[action]?.let { actionType ->
+            val listAction = Action.values().map { it.name }
+            if (!listAction.contains(actionType)){
+                handleUnknownAction()
+                return
+            }
+            when (Action.valueOf(actionType)) {
                 Action.LIKE -> handleLike(gson.fromJson(message.data[content], Like::class.java))
             }
         }
@@ -50,6 +55,17 @@ class FCMService : FirebaseMessagingService() {
                     content.postTitle,
                 )
             )
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        NotificationManagerCompat.from(this)
+            .notify(Random.nextInt(100_000), notification)
+    }
+
+    private fun handleUnknownAction() {
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.netology_foreground)
+            .setContentTitle(getString(R.string.obscure_operation))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 

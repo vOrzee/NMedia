@@ -20,4 +20,5 @@
     <string name="channel_remote_name">Название моего удалённого канала</string>
     <string name="channel_remote_description">Описание удалённого канала</string>
     <string name="notification_user_liked">%1$s поставил лайк посту %2$s</string>
+    <string name="obscure_operation">Какое-то сложное непонятное действие, если бы мы знали что это такое, мы не знаем что это такое… Страшно, очень страшно…</string>
 </resources>

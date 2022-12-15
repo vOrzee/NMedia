@@ -20,4 +20,5 @@
     <string name="channel_remote_name">My channel remote name</string>
     <string name="channel_remote_description">Channel remote description</string>
     <string name="notification_user_liked">%1$s liked post %2$s</string>
+    <string name="obscure_operation">Obscore operation</string>
 </resources>
