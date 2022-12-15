@@ -21,4 +21,6 @@
     <string name="channel_remote_description">Channel remote description</string>
     <string name="notification_user_liked">%1$s liked post %2$s</string>
     <string name="obscure_operation">Obscore operation</string>
+    <string name="unknown_action">Unknown action</string>
+    <string name="notification_user_sending_post">%1$s published a new post:</string>
 </resources>
