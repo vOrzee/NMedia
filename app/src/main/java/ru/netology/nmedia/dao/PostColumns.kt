@@ -3,7 +3,7 @@ package ru.netology.nmedia.dao
 object PostColumns {
     const val TABLE_NAME = "posts"
     const val COLUMN_ID = "id"
-    const val COLUMN_TITLE = "title"
+    const val COLUMN_TITLE = "author"
     const val COLUMN_CONTENT = "content"
     const val COLUMN_PUBLISHED = "published"
     const val COLUMN_LIKED_BY_ME = "likedByMe"

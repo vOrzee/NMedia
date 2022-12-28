@@ -23,4 +23,7 @@
     <string name="obscure_operation">Obscore operation</string>
     <string name="unknown_action">Unknown action</string>
     <string name="notification_user_sending_post">%1$s published a new post:</string>
+    <string name="error_loading">Error loading</string>
+    <string name="empty_posts">Posts not found</string>
+    <string name="retry_loading">Retry loading</string>
 </resources>

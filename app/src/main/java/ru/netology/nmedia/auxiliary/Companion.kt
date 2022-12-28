@@ -1,8 +1,8 @@
-package ru.netology.nmedia.activity
+package ru.netology.nmedia.auxiliary
 
 import android.os.Bundle
+import ru.netology.nmedia.auxiliary.ConstantValues.POST_KEY
 
-const val POST_KEY = "POST_KEY"
 
 class Companion {
 

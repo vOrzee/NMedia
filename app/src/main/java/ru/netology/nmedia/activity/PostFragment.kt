@@ -8,11 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import ru.netology.nmedia.R
-import ru.netology.nmedia.activity.Companion.Companion.longArg
-import ru.netology.nmedia.activity.Companion.Companion.textArg
 import androidx.navigation.fragment.findNavController
+import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
+import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.NumberTranslator.translateNumber
 import ru.netology.nmedia.databinding.FragmentPostBinding
@@ -26,16 +27,17 @@ class PostFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentPostBinding.inflate(layoutInflater)
-        val viewModel: PostViewModel by viewModels(::requireParentFragment)
+        val viewModel: PostViewModel by activityViewModels()
 
         with(binding.scrollContent) {
-            viewModel.data.observe(viewLifecycleOwner) { posts ->
+            viewModel.data.observe(viewLifecycleOwner) { state ->
+                val posts = state.posts
                 val post = posts.find { it.id == arguments?.longArg }
                 if (post != null) {
-                    title.text = post.title
+                    title.text = post.author
                     datePublished.text = post.published
                     content.text = post.content
-                    like.text = translateNumber(post.countLikes)
+                    like.text = translateNumber(post.likes)
                     like.isChecked = post.likedByMe
                     share.text = translateNumber(post.countShared)
                     share.isChecked = post.sharedByMe
