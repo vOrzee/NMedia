@@ -6,10 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.PackageManagerCompat.LOG_TAG
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapters.OnInteractionListener
@@ -20,6 +20,8 @@ import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
+import kotlin.concurrent.thread
+
 
 class FeedFragment : Fragment() {
 
@@ -98,6 +100,16 @@ class FeedFragment : Fragment() {
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
+
+        binding.retryButton.setOnClickListener {
+            viewModel.loadPosts()
+        }
+
+        binding.swipe.setOnRefreshListener {
+            binding.swipe.isRefreshing = false
+            viewModel.loadPosts()
+        }
+
         return binding.root
     }
 
