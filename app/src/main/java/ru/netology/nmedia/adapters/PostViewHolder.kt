@@ -2,6 +2,7 @@ package ru.netology.nmedia.adapters
 
 import android.view.View
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.auxiliary.NumberTranslator
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
@@ -35,11 +36,8 @@ class PostViewHolder(
     private fun postListeners(post: Post) {
         with(binding) {
             like.setOnClickListener {
-                like.text = if (!like.isChecked) { //для того чтобы каждый раз не запрашивать новый список постов
-                    NumberTranslator.translateNumber(like.text.toString().toInt() - 1)
-                } else {
-                    NumberTranslator.translateNumber(like.text.toString().toInt() + 1)
-                }
+                like.isChecked = !like.isChecked //отменяем смену состояния чтобы получить его с сервера
+                like.isClickable = false //защита от повторного запроса
                 onInteractionListener.onLike(post)
             }
             share.setOnClickListener {
@@ -50,7 +48,7 @@ class PostViewHolder(
                 }
                 onInteractionListener.onShare(post)
             }
-            postCard.setOnClickListener {
+            cardContent.setOnClickListener {
                 onInteractionListener.onPreviewPost(post)
             }
             playButtonVideoPost.setOnClickListener {

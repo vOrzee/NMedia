@@ -8,6 +8,11 @@
     android:padding="8dp"
     tools:context=".activity.FeedFragment">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/card_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <ImageView
         android:id="@+id/avatar"
         android:layout_width="@dimen/av_size"
@@ -80,12 +85,14 @@
         app:layout_constraintTop_toBottomOf="@+id/barrier1"
         tools:text="@string/test_content" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier_video"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="content" />
+        app:constraint_referenced_ids="card_content" />
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/video_content"
