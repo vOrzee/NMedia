@@ -12,7 +12,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 
-class PostRepositoryImpl: PostRepository {
+class PostRepositoryImpl : PostRepository {
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .build()
@@ -24,56 +24,9 @@ class PostRepositoryImpl: PostRepository {
         private val jsonType = "application/json".toMediaType()
     }
 
-    override fun getAll(): List<Post> {
-        val request: Request = Request.Builder()
-            .url("${BASE_URL}/api/slow/posts")
-            .build()
-
-        return client.newCall(request)
-            .execute()
-            .let {
-                it.body?.string()
-            }
-            ?.let {
-                gson.fromJson(it, typeToken.type)
-            } ?: emptyList()
-    }
-
-    override fun likeById(post: Post) : Post {
-        //Так как на сервере не предусмотрена проверка likedByMe приходится передавать пост целиком
-        val requestOutput: Request = if (post.likedByMe) {
-            Request.Builder()
-                .delete(gson.toJson(post).toRequestBody(jsonType))
-                .url("${BASE_URL}/api/slow/posts/${post.id}/likes")
-                .build()
-        } else {
-            Request.Builder()
-                .post(gson.toJson(post).toRequestBody(jsonType))
-                .url("${BASE_URL}/api/slow/posts/${post.id}/likes")
-                .build()
-        }
-        return client.newCall(requestOutput)
-            .execute()
-            .let { it.body?.string() ?: throw RuntimeException("body is null") }
-            .let {
-                gson.fromJson(it, Post::class.java)
-            }
-    }
-
     override fun shareById(id: Long) {
         //TODO add when server support this
         println("shared")
-    }
-
-    override fun save(post: Post) {
-        val request: Request = Request.Builder()
-            .post(gson.toJson(post).toRequestBody(jsonType))
-            .url("${BASE_URL}/api/slow/posts")
-            .build()
-
-        client.newCall(request)
-            .execute()
-            .close()
     }
 
     override fun getAllAsync(callback: PostRepository.Callback<List<Post>>) {
@@ -134,6 +87,7 @@ class PostRepositoryImpl: PostRepository {
                         callback.onError(e)
                     }
                 }
+
                 override fun onFailure(call: Call, e: IOException) {
                     callback.onError(e)
                 }
@@ -163,24 +117,14 @@ class PostRepositoryImpl: PostRepository {
                         callback.onError(e)
                     }
                 }
+
                 override fun onFailure(call: Call, e: IOException) {
                     callback.onError(e)
                 }
             })
     }
 
-    override fun removeById(id: Long) {
-        val request: Request = Request.Builder()
-            .delete()
-            .url("${BASE_URL}/api/slow/posts/$id")
-            .build()
-
-        client.newCall(request)
-            .execute()
-            .close()
-    }
-
-    override fun edit(post: Post) {
-        save(post)
+    override fun edit(post: Post, callback: PostRepository.Callback<Unit>) {
+        saveAsync(post, callback)
     }
 }

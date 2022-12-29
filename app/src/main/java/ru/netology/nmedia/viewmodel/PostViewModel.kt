@@ -12,10 +12,10 @@ import java.io.IOException
 import kotlin.concurrent.thread
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
-//    private val repository : PostRepository = PostRepositoryRoomImpl(
+    //    private val repository : PostRepository = PostRepositoryRoomImpl(
 //        AppDbRoom.getInstance(application).postDaoRoom()
 //    )
-    private val repository : PostRepository = PostRepositoryImpl()
+    private val repository: PostRepository = PostRepositoryImpl()
     private val _data = MutableLiveData(FeedModel())
     val data: LiveData<FeedModel>
         get() = _data
@@ -23,7 +23,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
         get() = _postCreated
-
 
 
     init {
@@ -42,6 +41,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
         })
     }
+
     fun likeById(id: Long) {
         val post = data.value?.posts?.find { it.id == id } ?: emptyPost
 
@@ -59,8 +59,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
         })
     }
+
     fun shareById(id: Long) {//пока ничего
     }
+
     fun removeById(id: Long) {
         val newState = _data.value?.posts.orEmpty()
             .filter { it.id != id }
@@ -95,7 +97,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value?.let { editedPost ->
             val newStatePosts = _data.value?.posts.orEmpty()
                 .map { if (it.id == editedPost.id) editedPost else it }
-            repository.saveAsync(editedPost,object : PostRepository.Callback<Unit> {
+            repository.saveAsync(editedPost, object : PostRepository.Callback<Unit> {
                 override fun onSuccess(value: Unit) {
                     _postCreated.postValue(Unit)
                     _data.postValue(FeedModel(posts = newStatePosts, onSuccess = true))

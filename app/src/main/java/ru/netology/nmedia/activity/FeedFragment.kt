@@ -96,8 +96,10 @@ class FeedFragment : Fragment() {
             binding.progress.isVisible = it.loading
             binding.errorGroup.isVisible = it.error
             binding.emptyText.isVisible = it.empty
-            if (it.onSuccess)  Toast.makeText(context,R.string.on_success, Toast.LENGTH_SHORT).show()
-            if (it.onFailure)  Toast.makeText(context,R.string.on_failure,Toast.LENGTH_SHORT).show()
+            if (it.onSuccess) Toast.makeText(context, R.string.on_success, Toast.LENGTH_SHORT)
+                .show()
+            if (it.onFailure) Toast.makeText(context, R.string.on_failure, Toast.LENGTH_SHORT)
+                .show()
         }
 
         binding.fab.setOnClickListener {
