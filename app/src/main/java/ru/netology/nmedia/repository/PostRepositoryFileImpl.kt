@@ -1,5 +1,5 @@
 package ru.netology.nmedia.repository
-
+/*
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -41,9 +41,9 @@ class PostRepositoryFileImpl(private val context: Context) : PostRepository {
     override fun likeById(id: Long) {
         posts = posts.map {
             if (it.id != id) it else {
-                val countLikes =
-                    if (it.likedByMe) (it.countLikes - 1) else (it.countLikes + 1)
-                it.copy(likedByMe = !it.likedByMe, countLikes = countLikes)
+                val likes =
+                    if (it.likedByMe) (it.likes - 1) else (it.likes + 1)
+                it.copy(likedByMe = !it.likedByMe, likes = likes)
             }
         }
         data.value = posts
@@ -53,9 +53,9 @@ class PostRepositoryFileImpl(private val context: Context) : PostRepository {
     override fun shareById(id: Long) {
         posts = posts.map {
             if (it.id != id) it else {
-                val countLikes =
+                val likes =
                     if (it.sharedByMe) (it.countShared - 1) else (it.countShared + 1)
-                it.copy(sharedByMe = !it.sharedByMe, countShared = countLikes)
+                it.copy(sharedByMe = !it.sharedByMe, countShared = likes)
             }
         }
         data.value = posts
@@ -77,7 +77,7 @@ class PostRepositoryFileImpl(private val context: Context) : PostRepository {
             posts = posts + listOf(
                 post.copy(
                     id = nextId++,
-                    title = "Me",
+                    author = "Me",
                     published = "now",
                     likedByMe = false,
                     sharedByMe = false,
@@ -96,3 +96,4 @@ class PostRepositoryFileImpl(private val context: Context) : PostRepository {
         sync()
     }
 }
+*/

@@ -12,11 +12,11 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
         with(cursor) {
             return Post(
                 id = getLong(getColumnIndexOrThrow(PostColumns.COLUMN_ID)),
-                title = getString(getColumnIndexOrThrow(PostColumns.COLUMN_TITLE)),
+                author = getString(getColumnIndexOrThrow(PostColumns.COLUMN_TITLE)),
                 content = getString(getColumnIndexOrThrow(PostColumns.COLUMN_CONTENT)),
                 published = getString(getColumnIndexOrThrow(PostColumns.COLUMN_PUBLISHED)),
                 likedByMe = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_LIKED_BY_ME)) != 0,
-                countLikes = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_LIKES)),
+                likes = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_LIKES)),
                 sharedByMe = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_LIKED_BY_ME)) != 0,
                 countShared = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_SHARES)),
                 viewedByMe = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_VIEW_BY_ME)) != 0,
@@ -56,8 +56,8 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
             if (post.id != 0L) {
                 put(PostColumns.COLUMN_ID, post.id)
             }
-            if (post.title.isNotBlank()) {
-                put(PostColumns.COLUMN_TITLE, post.title)
+            if (post.author.isNotBlank()) {
+                put(PostColumns.COLUMN_TITLE, post.author)
             }
             if (post.published.isNotBlank()) {
                 put(PostColumns.COLUMN_PUBLISHED, post.published)
@@ -66,7 +66,7 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
                 put(PostColumns.COLUMN_CONTENT, post.content)
             }
             put(PostColumns.COLUMN_LIKED_BY_ME, post.likedByMe)
-            put(PostColumns.COLUMN_LIKES, post.countLikes)
+            put(PostColumns.COLUMN_LIKES, post.likes)
             put(PostColumns.COLUMN_SHARE_BY_ME, post.sharedByMe)
             put(PostColumns.COLUMN_SHARES, post.countShared)
             put(PostColumns.COLUMN_VIEW_BY_ME, post.viewedByMe)

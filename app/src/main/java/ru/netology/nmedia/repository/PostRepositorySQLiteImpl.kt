@@ -1,5 +1,5 @@
 package ru.netology.nmedia.repository
-
+/*
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import ru.netology.nmedia.dao.PostDao
@@ -22,7 +22,7 @@ class PostRepositorySQLiteImpl(
         posts = posts.map {
             if (it.id != id) it else it.copy(
                 likedByMe = !it.likedByMe,
-                countLikes = if (it.likedByMe) (it.countLikes - 1) else (it.countLikes + 1)
+                likes = if (it.likedByMe) (it.likes - 1) else (it.likes + 1)
             )
         }
         data.value = posts
@@ -63,3 +63,4 @@ class PostRepositorySQLiteImpl(
     }
 
 }
+*/

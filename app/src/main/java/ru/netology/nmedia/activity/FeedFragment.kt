@@ -6,22 +6,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.PackageManagerCompat.LOG_TAG
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
-import ru.netology.nmedia.activity.Companion.Companion.longArg
-import ru.netology.nmedia.activity.Companion.Companion.textArg
 import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.adapters.PostAdapter
+import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
+import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
+import kotlin.concurrent.thread
+
 
 class FeedFragment : Fragment() {
 
-    val viewModel: PostViewModel by viewModels(::requireParentFragment)
+    val viewModel: PostViewModel by activityViewModels()
 
 
     private val interactionListener = object : OnInteractionListener {
@@ -72,6 +76,8 @@ class FeedFragment : Fragment() {
         }
     }
 
+    lateinit var binding: FragmentFeedBinding
+    lateinit var adapter: PostAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -79,18 +85,31 @@ class FeedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        val binding = FragmentFeedBinding.inflate(layoutInflater)
-        val adapter = PostAdapter(interactionListener)
+        binding = FragmentFeedBinding.inflate(layoutInflater)
+        adapter = PostAdapter(interactionListener)
 
         binding.list.adapter = adapter
 
-        viewModel.data.observe(viewLifecycleOwner) { posts ->
-            adapter.submitList(posts)
+        viewModel.data.observe(viewLifecycleOwner) {
+            adapter.submitList(it.posts)
+            binding.progress.isVisible = it.loading
+            binding.errorGroup.isVisible = it.error
+            binding.emptyText.isVisible = it.empty
         }
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
+
+        binding.retryButton.setOnClickListener {
+            viewModel.loadPosts()
+        }
+
+        binding.swipe.setOnRefreshListener {
+            binding.swipe.isRefreshing = false
+            viewModel.loadPosts()
+        }
+
         return binding.root
     }
 
