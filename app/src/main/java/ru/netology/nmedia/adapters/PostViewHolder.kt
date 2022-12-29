@@ -36,8 +36,12 @@ class PostViewHolder(
     private fun postListeners(post: Post) {
         with(binding) {
             like.setOnClickListener {
-                like.isChecked = !like.isChecked //отменяем смену состояния чтобы получить его с сервера
                 like.isClickable = false //защита от повторного запроса
+                like.text = if (!like.isChecked) { //для того чтобы каждый раз не запрашивать новый список постов
+                    NumberTranslator.translateNumber(like.text.toString().toInt() - 1)
+                } else {
+                    NumberTranslator.translateNumber(like.text.toString().toInt() + 1)
+                }
                 onInteractionListener.onLike(post)
             }
             share.setOnClickListener {

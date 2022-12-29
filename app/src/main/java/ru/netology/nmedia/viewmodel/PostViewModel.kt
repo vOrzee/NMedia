@@ -31,51 +31,52 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadPosts() {
-        thread {
-            // Начинаем загрузку
-            _data.postValue(FeedModel(loading = true))
-            try {
-                // Данные успешно получены
-                val posts = repository.getAll()
-                FeedModel(posts = posts, empty = posts.isEmpty())
-            } catch (e: IOException) {
-                // Получена ошибка
-                FeedModel(error = true)
-            }.also(_data::postValue)
-        }
+        _data.value = FeedModel(loading = true)
+        repository.getAllAsync(object : PostRepository.Callback<List<Post>> {
+            override fun onSuccess(value: List<Post>) {
+                _data.postValue(FeedModel(posts = value, empty = value.isEmpty()))
+            }
+
+            override fun onError(e: Exception) {
+                _data.postValue(FeedModel(error = true))
+            }
+        })
     }
     fun likeById(id: Long) {
         val post = data.value?.posts?.find { it.id == id } ?: emptyPost
-        thread {
-            val likedPost = repository.likeById(post)
-            _data.postValue(
-                _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                    .map { if (it.id == id) likedPost else it }
+
+        repository.likeByIdAsync(post, object : PostRepository.Callback<Post> {
+            override fun onSuccess(value: Post) {
+                _data.postValue(
+                    _data.value?.copy(posts = _data.value?.posts.orEmpty()
+                        .map { if (it.id == id) value else it }
+                    )
                 )
-            )
-        }
+            }
+
+            override fun onError(e: Exception) {
+                _data.postValue(FeedModel(onFailure = true))
+            }
+        })
     }
-    fun shareById(id: Long) {
-        thread {
-            repository.shareById(id)
-        }
+    fun shareById(id: Long) {//пока ничего
     }
     fun removeById(id: Long) {
-        thread {
-            // Оптимистичная модель
-            val old = _data.value?.posts.orEmpty()
-            _data.postValue(
-                _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                    .filter { it.id != id }
-                )
-            )
-            try {
-                repository.removeById(id)
-            } catch (e: IOException) {
-                _data.postValue(_data.value?.copy(posts = old))
+        val newState = _data.value?.posts.orEmpty()
+            .filter { it.id != id }
+        _data.postValue(FeedModel(posts = newState, loading = true))
+        repository.removeByIdAsync(id, object : PostRepository.Callback<Unit> {
+            override fun onSuccess(value: Unit) {
+                _data.postValue(FeedModel(posts = newState, onSuccess = true))
             }
-        }
+
+            override fun onError(e: Exception) {
+                loadPosts()
+                _data.postValue(FeedModel(onFailure = true))
+            }
+        })
     }
+
     fun edit(post: Post) {
         edited.value = post
     }
@@ -91,11 +92,20 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun save() {
-        edited.value?.let {
-            thread {
-                repository.save(it)
-                _postCreated.postValue(Unit)
-            }
+        edited.value?.let { editedPost ->
+            val newStatePosts = _data.value?.posts.orEmpty()
+                .map { if (it.id == editedPost.id) editedPost else it }
+            repository.saveAsync(editedPost,object : PostRepository.Callback<Unit> {
+                override fun onSuccess(value: Unit) {
+                    _postCreated.postValue(Unit)
+                    _data.postValue(FeedModel(posts = newStatePosts, onSuccess = true))
+                }
+
+                override fun onError(e: Exception) {
+                    loadPosts()
+                    _data.postValue(FeedModel(onFailure = true))
+                }
+            })
         }
         edited.value = emptyPost
     }

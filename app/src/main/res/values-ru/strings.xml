@@ -26,4 +26,6 @@
     <string name="error_loading">Ошибка сервера</string>
     <string name="empty_posts">Публикаций не найдено, но Вы можете быть первым</string>
     <string name="retry_loading">Повторить загрузку</string>
+    <string name="on_success">Успешно</string>
+    <string name="on_failure">Не шмогло!</string>
 </resources>
