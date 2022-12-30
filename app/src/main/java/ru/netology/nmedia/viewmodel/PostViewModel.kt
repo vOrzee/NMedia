@@ -42,7 +42,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                             renameUrl(PostRepositoryImpl.BASE_URL,"avatars",it.authorAvatar)
                         } else {
                             null
-                        }
+                        },
+                        attachment = if(it.attachment != null) {
+                            it.attachment.copy(url = renameUrl(PostRepositoryImpl.BASE_URL,"images", it.attachment.url))
+                            } else {
+                                null
+                            }
                         )
                     },
                     empty = value.isEmpty()))
@@ -67,8 +72,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                                     renameUrl(PostRepositoryImpl.BASE_URL,"avatars",value.authorAvatar)
                                 } else {
                                     null
+                                }, attachment =
+                                if(value.attachment != null) {
+                                    value.attachment.copy(url = renameUrl(PostRepositoryImpl.BASE_URL,"images",value.attachment.url))
+                                } else {
+                                    null
                                 })
                             else it
+
                         }
                     )
                 )

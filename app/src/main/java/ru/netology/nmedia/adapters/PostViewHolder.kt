@@ -2,11 +2,13 @@ package ru.netology.nmedia.adapters
 
 import android.view.View
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auxiliary.NumberTranslator
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
+import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Post
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,10 +38,17 @@ class PostViewHolder(
                 .timeout(10_000)
                 .into(avatar)
 
-            if (!post.videoUrl.isNullOrBlank()) {
-                videoContent.visibility = View.VISIBLE
+            if (post.attachment != null) {
+                attachmentContent.visibility = View.VISIBLE
+                Glide.with(imageAttachment)
+                    .load(post.attachment.url)
+                    .placeholder(R.drawable.not_image_1000)
+                    .timeout(10_000)
+                    .into(imageAttachment)
+                descriptionAttachment.text = post.attachment.description
+                playButtonVideoPost.isVisible = (post.attachment.type == AttachmentType.VIDEO)
             } else {
-                videoContent.visibility = View.GONE
+                attachmentContent.visibility = View.GONE
             }
             postListeners(post)
         }

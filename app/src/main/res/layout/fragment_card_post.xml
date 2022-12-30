@@ -13,79 +13,80 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/avatar"
-        android:layout_width="@dimen/av_size"
-        android:layout_height="@dimen/av_size"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/avatar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/netology_foreground" />
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="@dimen/av_size"
+            android:layout_height="@dimen/av_size"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/avatar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/netology_foreground" />
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/usual_margin"
-        android:layout_marginEnd="@dimen/usual_margin"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/date_published"
-        app:layout_constraintEnd_toStartOf="@+id/more_vert"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/avatar"
-        app:layout_constraintTop_toTopOf="@+id/avatar"
-        tools:text="@string/test_title" />
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/usual_margin"
+            android:layout_marginEnd="@dimen/usual_margin"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/date_published"
+            app:layout_constraintEnd_toStartOf="@+id/more_vert"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/avatar"
+            app:layout_constraintTop_toTopOf="@+id/avatar"
+            tools:text="@string/test_title" />
 
-    <TextView
-        android:id="@+id/date_published"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/usual_margin"
-        android:layout_marginEnd="@dimen/usual_margin"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/avatar"
-        app:layout_constraintEnd_toStartOf="@+id/more_vert"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/avatar"
-        app:layout_constraintTop_toBottomOf="@+id/title"
-        tools:text="@string/test_date_published" />
+        <TextView
+            android:id="@+id/date_published"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/usual_margin"
+            android:layout_marginEnd="@dimen/usual_margin"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/avatar"
+            app:layout_constraintEnd_toStartOf="@+id/more_vert"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/avatar"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            tools:text="@string/test_date_published" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/more_vert"
-        style="@style/Widget.AppTheme.MoreButton"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="@android:color/transparent"
-        android:checkable="true"
-        android:textSize="0sp"
-        app:icon="@drawable/ic_baseline_more_vert_24"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/more_vert"
+            style="@style/Widget.AppTheme.MoreButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:checkable="true"
+            android:textSize="0sp"
+            app:icon="@drawable/ic_baseline_more_vert_24"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrier1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="avatar, date_published, title, more_vert" />
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="avatar, date_published, title, more_vert" />
 
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/usual_margin"
-        android:layout_marginEnd="@dimen/usual_margin"
-        android:paddingVertical="@dimen/usual_margin"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@+id/barrier1"
-        tools:text="@string/test_content" />
+        <TextView
+            android:id="@+id/content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/usual_margin"
+            android:layout_marginEnd="@dimen/usual_margin"
+            android:paddingVertical="@dimen/usual_margin"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@+id/barrier1"
+            tools:text="@string/test_content" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier_video"
         android:layout_width="wrap_content"
@@ -95,21 +96,28 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/video_content"
+        android:id="@+id/attachment_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/barrier_video">
 
         <ImageView
-            android:id="@+id/video_plug"
-            android:layout_width="match_parent"
+            android:id="@+id/image_attachment"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/usual_margin"
             android:layout_marginEnd="@dimen/usual_margin"
             android:paddingVertical="@dimen/usual_margin"
             app:srcCompat="@drawable/plug_video"
             tools:ignore="MissingConstraints" />
+
+        <TextView
+            android:id="@+id/description_attachment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/image_attachment"
+            tools:ignore="MissingConstraints"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/play_button_video_post"
@@ -130,7 +138,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="video_content" />
+        app:constraint_referenced_ids="attachment_content" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/like"
