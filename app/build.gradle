@@ -21,10 +21,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    lintOptions {
-        baseline file("lint-baseline.xml")
-    }
-
     buildFeatures.viewBinding = true
     
     buildTypes {
