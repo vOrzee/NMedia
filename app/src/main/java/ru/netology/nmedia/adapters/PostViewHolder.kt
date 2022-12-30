@@ -2,11 +2,12 @@ package ru.netology.nmedia.adapters
 
 import android.view.View
 import android.widget.PopupMenu
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.auxiliary.NumberTranslator
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
 import ru.netology.nmedia.dto.Post
+import java.text.SimpleDateFormat
+import java.util.*
 
 class PostViewHolder(
     private val binding: FragmentCardPostBinding,
@@ -16,7 +17,8 @@ class PostViewHolder(
     fun renderingPostStructure(post: Post) {
         with(binding) {
             title.text = post.author
-            datePublished.text = post.published
+            datePublished.text = SimpleDateFormat("HH:mm:ss dd.MM.yyyy", Locale.ROOT)
+                .format(Date(post.published.toLong() * 1000))
             content.text = post.content
             like.text = NumberTranslator.translateNumber(post.likes)
             like.isChecked = post.likedByMe
@@ -36,16 +38,22 @@ class PostViewHolder(
     private fun postListeners(post: Post) {
         with(binding) {
             like.setOnClickListener {
-                like.isChecked = !like.isChecked //отменяем смену состояния чтобы получить его с сервера
                 like.isClickable = false //защита от повторного запроса
+                like.text =
+                    if (!like.isChecked) { //для того чтобы каждый раз не запрашивать новый список постов
+                        NumberTranslator.translateNumber(like.text.toString().toInt() - 1)
+                    } else {
+                        NumberTranslator.translateNumber(like.text.toString().toInt() + 1)
+                    }
                 onInteractionListener.onLike(post)
             }
             share.setOnClickListener {
-                share.text = if (!share.isChecked) { //для того чтобы каждый раз не запрашивать новый список постов
-                    NumberTranslator.translateNumber(share.text.toString().toInt() - 1)
-                } else {
-                    NumberTranslator.translateNumber(share.text.toString().toInt() + 1)
-                }
+                share.text =
+                    if (!share.isChecked) { //для того чтобы каждый раз не запрашивать новый список постов
+                        NumberTranslator.translateNumber(share.text.toString().toInt() - 1)
+                    } else {
+                        NumberTranslator.translateNumber(share.text.toString().toInt() + 1)
+                    }
                 onInteractionListener.onShare(post)
             }
             cardContent.setOnClickListener {

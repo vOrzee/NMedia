@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.PackageManagerCompat.LOG_TAG
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -95,6 +96,10 @@ class FeedFragment : Fragment() {
             binding.progress.isVisible = it.loading
             binding.errorGroup.isVisible = it.error
             binding.emptyText.isVisible = it.empty
+            if (it.onSuccess) Toast.makeText(context, R.string.on_success, Toast.LENGTH_SHORT)
+                .show()
+            if (it.onFailure) Toast.makeText(context, R.string.on_failure, Toast.LENGTH_SHORT)
+                .show()
         }
 
         binding.fab.setOnClickListener {

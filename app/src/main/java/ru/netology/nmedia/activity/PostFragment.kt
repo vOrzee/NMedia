@@ -18,6 +18,8 @@ import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.NumberTranslator.translateNumber
 import ru.netology.nmedia.databinding.FragmentPostBinding
 import ru.netology.nmedia.viewmodel.PostViewModel
+import java.text.SimpleDateFormat
+import java.util.*
 
 class PostFragment : Fragment() {
 
@@ -35,7 +37,8 @@ class PostFragment : Fragment() {
                 val post = posts.find { it.id == arguments?.longArg }
                 if (post != null) {
                     title.text = post.author
-                    datePublished.text = post.published
+                    datePublished.text = SimpleDateFormat("HH:mm:ss dd.MM.yyyy", Locale.ROOT)
+                        .format(Date(post.published.toLong() * 1000))
                     content.text = post.content
                     like.text = translateNumber(post.likes)
                     like.isChecked = post.likedByMe
@@ -50,7 +53,8 @@ class PostFragment : Fragment() {
                     }
 
                     like.setOnClickListener {
-                        like.isChecked = !like.isChecked //отменяем смену состояния чтобы получить его с сервера
+                        like.isChecked =
+                            !like.isChecked //отменяем смену состояния чтобы получить его с сервера
                         like.isClickable = false //защита от повторного запроса
                         viewModel.likeById(post.id)
                     }

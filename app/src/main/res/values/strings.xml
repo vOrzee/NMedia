@@ -26,4 +26,6 @@
     <string name="error_loading">Error loading</string>
     <string name="empty_posts">Posts not found</string>
     <string name="retry_loading">Retry loading</string>
+    <string name="on_success">Success</string>
+    <string name="on_failure">Error!</string>
 </resources>
