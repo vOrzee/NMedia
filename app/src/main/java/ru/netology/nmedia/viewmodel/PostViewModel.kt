@@ -2,6 +2,7 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
+import ru.netology.nmedia.BuildConfig.BASE_URL
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 //import ru.netology.nmedia.database.AppDbRoom
 import ru.netology.nmedia.dto.Post
@@ -27,7 +28,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         loadPosts()
     }
 
-    fun renameUrl(baseUrl: String, path: String, nameResource:String):String {
+    fun renameUrl(baseUrl: String, path: String, nameResource: String): String {
         return "$baseUrl/$path/$nameResource"
     }
 
@@ -35,22 +36,32 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         _data.value = FeedModel(loading = true)
         repository.getAllAsync(object : PostRepository.Callback<List<Post>> {
             override fun onSuccess(value: List<Post>) {
-                _data.postValue(FeedModel(
-                    posts = value.map {
-                        it.copy(authorAvatar =
-                        if(!it.authorAvatar.isNullOrBlank()) {
-                            renameUrl(PostRepositoryImpl.BASE_URL,"avatars",it.authorAvatar)
-                        } else {
-                            null
+                _data.postValue(
+                    FeedModel(
+                        posts = value.map {
+                            it.copy(
+                                authorAvatar =
+                                if (!it.authorAvatar.isNullOrBlank()) {
+                                    renameUrl(BASE_URL, "avatars", it.authorAvatar)
+                                } else {
+                                    null
+                                },
+                                attachment = if (it.attachment != null) {
+                                    it.attachment.copy(
+                                        url = renameUrl(
+                                            BASE_URL,
+                                            "images",
+                                            it.attachment.url
+                                        )
+                                    )
+                                } else {
+                                    null
+                                }
+                            )
                         },
-                        attachment = if(it.attachment != null) {
-                            it.attachment.copy(url = renameUrl(PostRepositoryImpl.BASE_URL,"images", it.attachment.url))
-                            } else {
-                                null
-                            }
-                        )
-                    },
-                    empty = value.isEmpty()))
+                        empty = value.isEmpty()
+                    )
+                )
             }
 
             override fun onError(e: Exception) {
@@ -67,26 +78,35 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _data.postValue(
                     _data.value?.copy(posts = _data.value?.posts.orEmpty()
                         .map {
-                            if (it.id == id) value.copy(authorAvatar =
-                                if(!value.authorAvatar.isNullOrBlank()) {
-                                    renameUrl(PostRepositoryImpl.BASE_URL,"avatars",value.authorAvatar)
+                            if (it.id == id) value.copy(
+                                authorAvatar =
+                                if (!value.authorAvatar.isNullOrBlank()) {
+                                    renameUrl(BASE_URL, "avatars", value.authorAvatar)
                                 } else {
                                     null
                                 }, attachment =
-                                if(value.attachment != null) {
-                                    value.attachment.copy(url = renameUrl(PostRepositoryImpl.BASE_URL,"images",value.attachment.url))
+                                if (value.attachment != null) {
+                                    value.attachment.copy(
+                                        url = renameUrl(
+                                            BASE_URL,
+                                            "images",
+                                            value.attachment.url
+                                        )
+                                    )
                                 } else {
                                     null
-                                })
+                                }
+                            )
                             else it
-
-                        }
+                        }, onFailure = false
                     )
                 )
             }
 
             override fun onError(e: Exception) {
-                _data.postValue(FeedModel(onFailure = true))
+                _data.postValue(FeedModel(
+                    posts = data.value?.posts ?: emptyList(), onFailure = true)
+                )
             }
         })
     }
@@ -100,12 +120,13 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         _data.postValue(FeedModel(posts = newState, loading = true))
         repository.removeByIdAsync(id, object : PostRepository.Callback<Unit> {
             override fun onSuccess(value: Unit) {
-                _data.postValue(FeedModel(posts = newState, onSuccess = true))
+                _data.postValue(FeedModel(posts = newState ?: emptyList(), onSuccess = true, onFailure = false))
+                if (newState.isEmpty()) loadPosts()
             }
 
             override fun onError(e: Exception) {
                 loadPosts()
-                _data.postValue(FeedModel(onFailure = true))
+                _data.postValue(FeedModel(onFailure = true, onSuccess = false))
             }
         })
     }
@@ -128,15 +149,15 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value?.let { editedPost ->
             val newStatePosts = _data.value?.posts.orEmpty()
                 .map { if (it.id == editedPost.id) editedPost else it }
-            repository.saveAsync(editedPost, object : PostRepository.Callback<Unit> {
-                override fun onSuccess(value: Unit) {
+            repository.saveAsync(editedPost, object : PostRepository.Callback<Post> {
+                override fun onSuccess(value: Post) {
                     _postCreated.postValue(Unit)
-                    _data.postValue(FeedModel(posts = newStatePosts, onSuccess = true))
+                    _data.postValue(FeedModel(posts = newStatePosts, onSuccess = true, onFailure = false))
                 }
 
                 override fun onError(e: Exception) {
                     loadPosts()
-                    _data.postValue(FeedModel(onFailure = true))
+                    _data.postValue(FeedModel(onFailure = true, onSuccess = false))
                 }
             })
         }

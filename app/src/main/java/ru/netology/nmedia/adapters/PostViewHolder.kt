@@ -58,12 +58,7 @@ class PostViewHolder(
         with(binding) {
             like.setOnClickListener {
                 like.isClickable = false //защита от повторного запроса
-                like.text =
-                    if (!like.isChecked) { //для того чтобы каждый раз не запрашивать новый список постов
-                        NumberTranslator.translateNumber(like.text.toString().toInt() - 1)
-                    } else {
-                        NumberTranslator.translateNumber(like.text.toString().toInt() + 1)
-                    }
+                like.isChecked = !like.isChecked //Инвертируем нажатие
                 onInteractionListener.onLike(post)
             }
             share.setOnClickListener {
