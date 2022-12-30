@@ -7,16 +7,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import ru.netology.nmedia.R
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.NumberTranslator.translateNumber
 import ru.netology.nmedia.databinding.FragmentPostBinding
+import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.viewmodel.PostViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -46,10 +49,24 @@ class PostFragment : Fragment() {
                     share.isChecked = post.sharedByMe
                     view.text = translateNumber(post.countViews)
                     view.isChecked = post.viewedByMe
-                    if (!post.videoUrl.isNullOrBlank()) {
-                        videoContent.visibility = View.VISIBLE
+                    Glide.with(avatar)
+                        .load(post.authorAvatar)
+                        .placeholder(R.drawable.ic_image_not_supported_24)
+                        .error(R.drawable.ic_not_avatars_24)
+                        .circleCrop()
+                        .timeout(10_000)
+                        .into(avatar)
+                    if (post.attachment != null) {
+                        attachmentContent.visibility = View.VISIBLE
+                        Glide.with(imageAttachment)
+                            .load(post.attachment.url)
+                            .placeholder(R.drawable.not_image_1000)
+                            .timeout(10_000)
+                            .into(imageAttachment)
+                        descriptionAttachment.text = post.attachment.description
+                        playButtonVideoPost.isVisible = (post.attachment.type == AttachmentType.VIDEO)
                     } else {
-                        videoContent.visibility = View.GONE
+                        attachmentContent.visibility = View.GONE
                     }
 
                     like.setOnClickListener {

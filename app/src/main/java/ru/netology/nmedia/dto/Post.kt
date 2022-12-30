@@ -12,5 +12,18 @@ data class Post(
     val countShared: Int = 999,
     val viewedByMe: Boolean = false,
     val countViews: Int = 99_999,
-    val videoUrl: String? = null
+    val videoUrl: String? = null,
+    val attachment: Attachment? = null,
+
 )
+
+data class Attachment(
+    val url: String,
+    val description: String?,
+    val type: AttachmentType,
+)
+
+enum class AttachmentType {
+    IMAGE,
+    VIDEO
+}

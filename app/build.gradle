@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'com.google.gms.google-services'
+
 }
 
 android {
@@ -59,6 +60,8 @@ dependencies {
     def firebase_version = "26.7.0"
     def play_services_base_version = "18.1.0"
     def okhttp_version = "4.10.0"
+    def swipe_refresh_layout = "1.1.0"
+    def glide_version = "4.14.2"
 
     implementation "androidx.core:core-ktx:$core_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
@@ -82,7 +85,9 @@ dependencies {
     implementation "com.google.android.gms:play-services-base:$play_services_base_version"
 
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$swipe_refresh_layout"
+
+    implementation "com.github.bumptech.glide:glide:$glide_version"
 
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"
