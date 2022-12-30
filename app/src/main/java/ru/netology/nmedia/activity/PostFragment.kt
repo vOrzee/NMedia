@@ -12,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import ru.netology.nmedia.R
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
@@ -46,6 +47,13 @@ class PostFragment : Fragment() {
                     share.isChecked = post.sharedByMe
                     view.text = translateNumber(post.countViews)
                     view.isChecked = post.viewedByMe
+                    Glide.with(avatar)
+                        .load(post.authorAvatar)
+                        .placeholder(R.drawable.ic_image_not_supported_24)
+                        .error(R.drawable.ic_not_avatars_24)
+                        .circleCrop()
+                        .timeout(10_000)
+                        .into(avatar)
                     if (!post.videoUrl.isNullOrBlank()) {
                         videoContent.visibility = View.VISIBLE
                     } else {

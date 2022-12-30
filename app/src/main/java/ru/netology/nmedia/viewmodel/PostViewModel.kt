@@ -8,8 +8,6 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
-import java.io.IOException
-import kotlin.concurrent.thread
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
     //    private val repository : PostRepository = PostRepositoryRoomImpl(
@@ -29,11 +27,25 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         loadPosts()
     }
 
+    fun renameUrl(baseUrl: String, path: String, nameResource:String):String {
+        return "$baseUrl/$path/$nameResource"
+    }
+
     fun loadPosts() {
         _data.value = FeedModel(loading = true)
         repository.getAllAsync(object : PostRepository.Callback<List<Post>> {
             override fun onSuccess(value: List<Post>) {
-                _data.postValue(FeedModel(posts = value, empty = value.isEmpty()))
+                _data.postValue(FeedModel(
+                    posts = value.map {
+                        it.copy(authorAvatar =
+                        if(!it.authorAvatar.isNullOrBlank()) {
+                            renameUrl(PostRepositoryImpl.BASE_URL,"avatars",it.authorAvatar)
+                        } else {
+                            null
+                        }
+                        )
+                    },
+                    empty = value.isEmpty()))
             }
 
             override fun onError(e: Exception) {
@@ -49,7 +61,15 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             override fun onSuccess(value: Post) {
                 _data.postValue(
                     _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                        .map { if (it.id == id) value else it }
+                        .map {
+                            if (it.id == id) value.copy(authorAvatar =
+                                if(!value.authorAvatar.isNullOrBlank()) {
+                                    renameUrl(PostRepositoryImpl.BASE_URL,"avatars",value.authorAvatar)
+                                } else {
+                                    null
+                                })
+                            else it
+                        }
                     )
                 )
             }
