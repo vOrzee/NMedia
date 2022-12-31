@@ -74,7 +74,7 @@ class PostFragment : Fragment() {
                         like.isChecked =
                             !like.isChecked //отменяем смену состояния чтобы получить его с сервера
                         like.isClickable = false //защита от повторного запроса
-                        viewModel.likeById(post.id)
+                        viewModel.likeById(post)
                     }
 
                     share.setOnClickListener {
