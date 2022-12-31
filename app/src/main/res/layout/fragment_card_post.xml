@@ -109,6 +109,8 @@
             android:layout_marginStart="@dimen/usual_margin"
             android:layout_marginEnd="@dimen/usual_margin"
             android:paddingVertical="@dimen/usual_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/plug_video"
             tools:ignore="MissingConstraints" />
 

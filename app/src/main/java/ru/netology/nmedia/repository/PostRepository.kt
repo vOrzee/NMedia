@@ -5,11 +5,11 @@ import ru.netology.nmedia.dto.Post
 
 interface PostRepository {
     fun shareById(id: Long)
-    fun edit(post: Post, callback: Callback<Unit>)
+    fun edit(post: Post, callback: Callback<Post>)
 
     fun getAllAsync(callback: Callback<List<Post>>)
     fun removeByIdAsync(id: Long, callback: Callback<Unit>)
-    fun saveAsync(post: Post, callback: Callback<Unit>)
+    fun saveAsync(post: Post, callback: Callback<Post>)
     fun likeByIdAsync(post: Post, callback: Callback<Post>)
 
     interface Callback<T> {
