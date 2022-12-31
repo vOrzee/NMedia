@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
+import ru.netology.nmedia.auxiliary.FloatingValue
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.NumberTranslator.translateNumber
 import ru.netology.nmedia.databinding.FragmentPostBinding
@@ -50,7 +51,7 @@ class PostFragment : Fragment() {
                     view.text = translateNumber(post.countViews)
                     view.isChecked = post.viewedByMe
                     Glide.with(avatar)
-                        .load(post.authorAvatar)
+                        .load(FloatingValue.renameUrl(post.authorAvatar ?: "", "avatars"))
                         .placeholder(R.drawable.ic_image_not_supported_24)
                         .error(R.drawable.ic_not_avatars_24)
                         .circleCrop()
@@ -59,7 +60,7 @@ class PostFragment : Fragment() {
                     if (post.attachment != null) {
                         attachmentContent.visibility = View.VISIBLE
                         Glide.with(imageAttachment)
-                            .load(post.attachment.url)
+                            .load(FloatingValue.renameUrl(post.attachment.url, "images"))
                             .placeholder(R.drawable.not_image_1000)
                             .timeout(10_000)
                             .into(imageAttachment)
@@ -118,7 +119,7 @@ class PostFragment : Fragment() {
                     }
 
                     playButtonVideoPost.setOnClickListener {
-                        val playIntent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoUrl))
+                        val playIntent = Intent(Intent.ACTION_VIEW, Uri.parse(post.attachment?.url))
                         if (playIntent.resolveActivity(requireContext().packageManager) != null) {
                             startActivity(playIntent)
                         }

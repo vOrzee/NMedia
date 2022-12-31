@@ -6,6 +6,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auxiliary.FloatingValue.renameUrl
 import ru.netology.nmedia.auxiliary.NumberTranslator
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
 import ru.netology.nmedia.dto.AttachmentType
@@ -31,7 +32,7 @@ class PostViewHolder(
             view.text = NumberTranslator.translateNumber(post.countViews)
             view.isChecked = post.viewedByMe
             Glide.with(avatar)
-                .load(post.authorAvatar)
+                .load(renameUrl(post.authorAvatar ?: "","avatars"))
                 .placeholder(R.drawable.ic_image_not_supported_24)
                 .error(R.drawable.ic_not_avatars_24)
                 .circleCrop()
@@ -39,9 +40,9 @@ class PostViewHolder(
                 .into(avatar)
 
             if (post.attachment != null) {
-                attachmentContent.visibility = View.VISIBLE
+                attachmentContent.isVisible = true
                 Glide.with(imageAttachment)
-                    .load(post.attachment.url)
+                    .load(renameUrl(post.attachment.url,"images"))
                     .placeholder(R.drawable.not_image_1000)
                     .timeout(10_000)
                     .into(imageAttachment)
@@ -57,7 +58,7 @@ class PostViewHolder(
     private fun postListeners(post: Post) {
         with(binding) {
             like.setOnClickListener {
-                like.isClickable = false //защита от повторного запроса
+                //like.isClickable = false //защита от повторного запроса
                 like.isChecked = !like.isChecked //Инвертируем нажатие
                 onInteractionListener.onLike(post)
             }
