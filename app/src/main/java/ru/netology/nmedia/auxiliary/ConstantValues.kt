@@ -1,6 +1,7 @@
 package ru.netology.nmedia.auxiliary
 
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.model.PhotoModel
 
 object ConstantValues {
     const val POST_KEY = "POST_KEY"
@@ -13,4 +14,5 @@ object ConstantValues {
         countViews = 0,
         published = ""
     )
+    val noPhoto = PhotoModel()
 }

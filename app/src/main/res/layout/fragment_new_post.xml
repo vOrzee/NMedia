@@ -11,7 +11,8 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:ignore="MissingConstraints">
 
         <EditText
             android:id="@+id/edit"
@@ -82,23 +83,16 @@
             app:icon="@drawable/ic_baseline_photo_camera_24" />
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:src="@drawable/ic_baseline_check_24"
-        android:id="@+id/fab_complete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:src="@drawable/ic_baseline_undo_24"
         android:id="@+id/fab_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/usual_margin"
-        app:layout_constraintBottom_toTopOf="@id/fab_complete"
-        app:layout_constraintStart_toStartOf="@id/fab_complete" />
+        android:layout_margin="@dimen/usual_margin"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ProgressBar
         android:id="@+id/saving_progress_bar"

@@ -63,6 +63,7 @@ class FeedFragment : Fragment() {
                 Bundle().apply {
                     textArg = post.content
                 })
+
         }
 
         override fun onPlayVideo(post: Post) {
