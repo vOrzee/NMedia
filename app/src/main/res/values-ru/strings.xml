@@ -28,4 +28,5 @@
     <string name="retry_loading">Повторить загрузку</string>
     <string name="on_success">Успешно</string>
     <string name="on_failure">Не шмогло!</string>
+    <string name="newer_posts">Свежие записи</string>
 </resources>

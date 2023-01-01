@@ -7,12 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.content.PackageManagerCompat.LOG_TAG
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.adapters.PostAdapter
@@ -23,7 +25,7 @@ import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewmodel.PostViewModel
-import kotlin.concurrent.thread
+import kotlin.coroutines.EmptyCoroutineContext
 
 
 class FeedFragment : Fragment() {
@@ -120,6 +122,21 @@ class FeedFragment : Fragment() {
 
         binding.swipe.setOnRefreshListener {
             viewModel.refreshPosts()
+        }
+
+        binding.newerCount.setOnClickListener {
+            binding.newerCount.isVisible = false
+            CoroutineScope(EmptyCoroutineContext).launch{
+                launch {
+                    viewModel.viewNewPosts()
+                    delay(25) // без delay прокручивает раньше, не смотря на join
+                }.join()
+                binding.list.smoothScrollToPosition(0)
+            }
+        }
+
+        viewModel.newerCount.observe(viewLifecycleOwner) { state ->
+            binding.newerCount.isVisible = state>0
         }
 
         return binding.root

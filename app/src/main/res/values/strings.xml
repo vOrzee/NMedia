@@ -28,4 +28,5 @@
     <string name="retry_loading">Retry loading</string>
     <string name="on_success">Success</string>
     <string name="on_failure">Error!</string>
+    <string name="newer_posts">Свежие записи</string>
 </resources>
