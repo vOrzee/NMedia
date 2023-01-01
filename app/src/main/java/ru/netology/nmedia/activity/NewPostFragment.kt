@@ -64,7 +64,7 @@ class NewPostFragment : Fragment() {
 //                .into(photo)
 
             viewModel.photo.observe(viewLifecycleOwner) {
-                if (it.uri == null && viewModel.getEditedPostImgRes().isNullOrBlank()) {
+                if (it.uri == null /*&& viewModel.getEditedPostImgRes().isNullOrBlank()*/) {
                     binding.photoContainer.visibility = View.GONE
                     return@observe
                 }
