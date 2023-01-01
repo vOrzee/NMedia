@@ -14,6 +14,7 @@ interface OnInteractionListener {
     fun onRemove(post: Post) {}
     fun onPlayVideo(post: Post) {}
     fun onPreviewPost(post: Post) {}
+    fun onPreviewAttachment(post: Post) {}
 }
 
 class PostAdapter(

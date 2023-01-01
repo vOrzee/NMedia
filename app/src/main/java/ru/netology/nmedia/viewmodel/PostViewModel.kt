@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.BuildConfig.BASE_URL
+import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.database.AppDbRoom
 //import ru.netology.nmedia.database.AppDbRoom
@@ -84,7 +85,16 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
+    fun getCommentsById(post: Post) {
+        viewModelScope.launch {
+            try {
+                repository.getCommentsById(post)
+                _dataState.value = FeedModelState.Idle
+            } catch (e: Exception) {
+                _dataState.value = FeedModelState.Error
+            }
+        }
+    }
     fun shareById(id: Long) {//пока ничего
     }
 

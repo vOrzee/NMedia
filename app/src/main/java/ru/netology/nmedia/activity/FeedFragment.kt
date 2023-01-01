@@ -79,6 +79,14 @@ class FeedFragment : Fragment() {
                     longArg = post.id
                 })
         }
+
+        override fun onPreviewAttachment(post: Post) {
+            findNavController().navigate(
+                R.id.action_feedFragment_to_viewImageAttach,
+                Bundle().apply {
+                    textArg = post.attachment?.url
+                })
+        }
     }
 
     lateinit var binding: FragmentFeedBinding

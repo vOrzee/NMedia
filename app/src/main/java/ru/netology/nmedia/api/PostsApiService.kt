@@ -8,6 +8,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import ru.netology.nmedia.BuildConfig
+import ru.netology.nmedia.dto.Comment
 import ru.netology.nmedia.dto.Post
 
 const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/"
@@ -37,6 +38,9 @@ interface PostsApiService {
 
     @GET("posts/{id}")
     suspend fun getById(@Path("id") id: Long): Response<Post>
+
+    @GET("posts/{id}/comments")
+    suspend fun getCommentsById(@Path("id") id: Long): Response<List<Comment>>
 
     @POST("posts")
     suspend fun save(@Body post: Post): Response<Post>

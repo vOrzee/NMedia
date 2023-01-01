@@ -29,4 +29,10 @@
     <string name="on_success">Успешно</string>
     <string name="on_failure">Не шмогло!</string>
     <string name="newer_posts">Свежие записи</string>
+    <string name="playvideo">PlayVideo</string>
+    <string name="play_video">Play Video</string>
+    <string name="description_photo">description photo</string>
+    <string name="remove">Remove</string>
+    <string name="description_select_photo">Description select photo</string>
+    <string name="description_take_photo">take photo</string>
 </resources>

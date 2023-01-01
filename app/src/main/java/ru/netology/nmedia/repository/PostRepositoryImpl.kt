@@ -11,10 +11,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import okio.IOException
 import ru.netology.nmedia.api.*
-import ru.netology.nmedia.dao.PostDaoRoom
-import ru.netology.nmedia.dao.PostEntity
-import ru.netology.nmedia.dao.toDto
-import ru.netology.nmedia.dao.toEntity
+import ru.netology.nmedia.dao.*
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
@@ -126,6 +123,23 @@ class PostRepositoryImpl(private val dao: PostDaoRoom) : PostRepository {
             }
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insert(PostEntity.fromDto(body))
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun getCommentsById(post: Post) {
+        try {
+            val response = PostsApi.retrofitService.getCommentsById(post.id)
+
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            dao.insertCommentsPost(body.toEntity())
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {

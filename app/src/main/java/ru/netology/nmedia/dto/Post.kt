@@ -13,7 +13,6 @@ data class Post(
     val viewedByMe: Boolean = false,
     val countViews: Int = 99_999,
     val attachment: Attachment? = null,
-
 )
 
 data class Attachment(
