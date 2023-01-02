@@ -21,7 +21,7 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
                 countShared = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_SHARES)),
                 viewedByMe = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_VIEW_BY_ME)) != 0,
                 countViews = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_VIEWS)),
-                videoUrl = getString(getColumnIndexOrThrow(PostColumns.COLUMN_VIDEO_URL))
+                //videoUrl = getString(getColumnIndexOrThrow(PostColumns.COLUMN_VIDEO_URL))
             )
         }
     }
@@ -71,7 +71,7 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
             put(PostColumns.COLUMN_SHARES, post.countShared)
             put(PostColumns.COLUMN_VIEW_BY_ME, post.viewedByMe)
             put(PostColumns.COLUMN_VIEWS, post.countViews)
-            put(PostColumns.COLUMN_VIDEO_URL, post.videoUrl)
+            //put(PostColumns.COLUMN_VIDEO_URL, post.videoUrl)
         }
         val id = db.replace(PostColumns.TABLE_NAME, null, values)
         db.query(

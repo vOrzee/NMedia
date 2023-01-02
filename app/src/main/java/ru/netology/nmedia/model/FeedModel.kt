@@ -4,10 +4,12 @@ import ru.netology.nmedia.dto.Post
 
 data class FeedModel(
     val posts: List<Post> = emptyList(),
-    val loading: Boolean = false,
-    val error: Boolean = false,
     val empty: Boolean = false,
-    val refreshing: Boolean = false,
-    val onSuccess: Boolean = false,
-    val onFailure: Boolean = false,
 )
+
+sealed interface FeedModelState {
+    object Loading : FeedModelState
+    object Error : FeedModelState
+    object Refresh : FeedModelState
+    object Idle : FeedModelState
+}

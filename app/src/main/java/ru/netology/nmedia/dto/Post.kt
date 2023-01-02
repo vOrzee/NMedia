@@ -12,7 +12,6 @@ data class Post(
     val countShared: Int = 999,
     val viewedByMe: Boolean = false,
     val countViews: Int = 99_999,
-    val videoUrl: String? = null,
     val attachment: Attachment? = null,
 
 )

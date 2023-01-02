@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.adapters.PostAdapter
@@ -20,6 +21,7 @@ import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewmodel.PostViewModel
 import kotlin.concurrent.thread
 
@@ -32,7 +34,7 @@ class FeedFragment : Fragment() {
     private val interactionListener = object : OnInteractionListener {
 
         override fun onLike(post: Post) {
-            viewModel.likeById(post.id)
+            viewModel.likeById(post)
         }
 
         override fun onShare(post: Post) {
@@ -62,7 +64,7 @@ class FeedFragment : Fragment() {
         }
 
         override fun onPlayVideo(post: Post) {
-            val playIntent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoUrl))
+            val playIntent = Intent(Intent.ACTION_VIEW, Uri.parse(post.attachment?.url))
             if (playIntent.resolveActivity(requireContext().packageManager) != null) {
                 startActivity(playIntent)
             }
@@ -93,13 +95,18 @@ class FeedFragment : Fragment() {
 
         viewModel.data.observe(viewLifecycleOwner) {
             adapter.submitList(it.posts)
-            binding.progress.isVisible = it.loading
-            binding.errorGroup.isVisible = it.error
             binding.emptyText.isVisible = it.empty
-            if (it.onSuccess) Toast.makeText(context, R.string.on_success, Toast.LENGTH_SHORT)
-                .show()
-            if (it.onFailure) {
-                Toast.makeText(context, R.string.on_failure, Toast.LENGTH_SHORT).show()
+        }
+        viewModel.dataState.observe(viewLifecycleOwner) {
+            binding.progress.isVisible = it is FeedModelState.Loading
+            binding.swipe.isRefreshing = it is FeedModelState.Refresh
+            if (it is FeedModelState.Error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
+                    .show()
+            }
+            if (it is FeedModelState.Idle) {
+                Toast.makeText(context, R.string.on_success, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -112,8 +119,7 @@ class FeedFragment : Fragment() {
         }
 
         binding.swipe.setOnRefreshListener {
-            binding.swipe.isRefreshing = false
-            viewModel.loadPosts()
+            viewModel.refreshPosts()
         }
 
         return binding.root

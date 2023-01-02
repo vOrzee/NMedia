@@ -1,6 +1,10 @@
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -33,6 +37,7 @@
         android:id="@+id/errorGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         app:constraint_referenced_ids="retryTitle,retryButton" />
 
     <TextView
@@ -71,6 +76,8 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+</androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:src="@drawable/ic_baseline_add_24"
         android:id="@+id/fab"
@@ -79,8 +86,9 @@
         android:layout_margin="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:layout_gravity="bottom|end"
         android:contentDescription="@string/add" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 
