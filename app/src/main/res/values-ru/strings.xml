@@ -38,4 +38,8 @@
     <string name="sign_in">Войти</string>
     <string name="sign_up">Зарегистрироваться</string>
     <string name="sign_out">Выйти</string>
+    <string name="hint_author_name">Логин</string>
+    <string name="hint_password">Пароль</string>
+    <string name="hint_password_confirm">Повторите пароль</string>
+    <string name="upload_avatar">Загрузить аватар</string>
 </resources>

@@ -3,12 +3,11 @@ package ru.netology.nmedia.activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ListView
 import android.widget.PopupMenu
 import android.widget.SimpleAdapter
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -17,6 +16,7 @@ import ru.netology.nmedia.R
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.adapters.PostAdapter
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue
@@ -24,6 +24,7 @@ import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.NumberTranslator.translateNumber
 import ru.netology.nmedia.databinding.FragmentPostBinding
 import ru.netology.nmedia.dto.AttachmentType
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,6 +39,56 @@ class PostFragment : Fragment() {
         val binding = FragmentPostBinding.inflate(layoutInflater)
         val viewModel: PostViewModel by activityViewModels()
 
+        val authViewModel: AuthViewModel by viewModels()
+
+        var menuProvider: MenuProvider? = null
+
+        authViewModel.data.observe(viewLifecycleOwner) {
+            menuProvider?.let(requireActivity()::removeMenuProvider)
+            requireActivity().addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_main, menu)
+
+                    menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
+                    menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
+
+                }
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    return when (menuItem.itemId) {
+                        R.id.signin -> {
+                            // TODO: just hardcode it, implementation must be in homework
+                            AppAuth.getInstance().setAuth(5, "x-token")
+                            findNavController().navigate(
+                                R.id.action_feedFragment_to_authFragment,
+                                Bundle().apply {
+                                    textArg = getString(R.string.sign_in)
+                                }
+                            )
+                            true
+                        }
+                        R.id.signup -> {
+                            // TODO: just hardcode it, implementation must be in homework
+                            AppAuth.getInstance().setAuth(5, "x-token")
+                            findNavController().navigate(
+                                R.id.action_feedFragment_to_authFragment,
+                                Bundle().apply {
+                                    textArg = getString(R.string.sign_up)
+                                }
+                            )
+                            true
+                        }
+                        R.id.signout -> {
+                            AppAuth.getInstance().removeAuth()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+            }.apply {
+                menuProvider = this
+            }, viewLifecycleOwner)
+        }
         with(binding.singlePost) {
             viewModel.data.observe(viewLifecycleOwner) { state ->
                 val posts = state.posts

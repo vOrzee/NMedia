@@ -38,4 +38,8 @@
     <string name="sign_in">Sign In</string>
     <string name="sign_up">Sign Up</string>
     <string name="sign_out">Sign Out</string>
+    <string name="hint_author_name">Login</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_password_confirm">Repeat password</string>
+    <string name="upload_avatar">Upload Avatar</string>
 </resources>
