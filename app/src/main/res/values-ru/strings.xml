@@ -43,4 +43,12 @@
     <string name="hint_password_confirm">Повторите пароль</string>
     <string name="upload_avatar">Загрузить аватар</string>
     <string name="error_password_not_ident">Введёные пароли не совпадают</string>
+    <string name="are_you_suare">Вы точно хотите выйти?</string>
+    <string name="yes">Да!</string>
+    <string name="no">Передумал</string>
+    <string name="eror_code">Код ошибки</string>
+    <string name="not_pass_enter">Неверный логин или пароль</string>
+    <string name="action_not_allowed">Действие доступно только для зарегистрированных пользователей</string>
+    <string name="back">Назад</string>
+    <string name="hint_enter_name">Имя</string>
 </resources>

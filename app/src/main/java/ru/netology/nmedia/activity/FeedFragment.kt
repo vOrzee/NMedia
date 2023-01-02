@@ -1,5 +1,6 @@
 package ru.netology.nmedia.activity
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -7,9 +8,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.*
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +21,7 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
+import ru.netology.nmedia.auxiliary.FloatingValue.showRegistrationDialog
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModelState
@@ -34,11 +34,38 @@ class FeedFragment : Fragment() {
 
     val viewModel: PostViewModel by activityViewModels()
 
+    val authViewModel: AuthViewModel by viewModels()
+
 
     private val interactionListener = object : OnInteractionListener {
 
         override fun onLike(post: Post) {
-            viewModel.likeById(post)
+            if (authViewModel.authenticated) {
+                viewModel.likeById(post)
+            } else {
+                AlertDialog.Builder(context)
+                    .setMessage(R.string.action_not_allowed)
+                    .setPositiveButton(R.string.sign_up) { _, _ ->
+                        findNavController().navigate(
+                            R.id.action_feedFragment_to_authFragment,
+                            Bundle().apply {
+                                textArg = getString(R.string.sign_up)
+                            }
+                        )
+                    }
+                    .setNeutralButton(R.string.sign_in) { _, _ ->
+                        findNavController().navigate(
+                            R.id.action_feedFragment_to_authFragment,
+                            Bundle().apply {
+                                textArg = getString(R.string.sign_in)
+                            }
+                        )
+                    }
+                    .setNegativeButton(R.string.no, null)
+                    .setCancelable(true)
+                    .create()
+                    .show()
+            }
         }
 
         override fun onShare(post: Post) {
@@ -123,9 +150,8 @@ class FeedFragment : Fragment() {
             }
         }
 
-        val authViewModel: AuthViewModel by viewModels()
 
-        var menuProvider:MenuProvider? = null
+        var menuProvider: MenuProvider? = null
 
         authViewModel.data.observe(viewLifecycleOwner) {
             menuProvider?.let(requireActivity()::removeMenuProvider)
@@ -141,8 +167,6 @@ class FeedFragment : Fragment() {
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                     return when (menuItem.itemId) {
                         R.id.signin -> {
-                            // TODO: just hardcode it, implementation must be in homework
-                            AppAuth.getInstance().setAuth(5, "x-token")
                             findNavController().navigate(
                                 R.id.action_feedFragment_to_authFragment,
                                 Bundle().apply {
@@ -152,8 +176,6 @@ class FeedFragment : Fragment() {
                             true
                         }
                         R.id.signup -> {
-                            // TODO: just hardcode it, implementation must be in homework
-                            AppAuth.getInstance().setAuth(5, "x-token")
                             findNavController().navigate(
                                 R.id.action_feedFragment_to_authFragment,
                                 Bundle().apply {
@@ -163,20 +185,52 @@ class FeedFragment : Fragment() {
                             true
                         }
                         R.id.signout -> {
-                            AppAuth.getInstance().removeAuth()
+                            AlertDialog.Builder(requireActivity())
+                                .setTitle(R.string.are_you_suare)
+                                .setPositiveButton(R.string.yes) { _, _ ->
+                                    AppAuth.getInstance().removeAuth()
+                                }
+                                .setCancelable(true)
+                                .setNegativeButton(R.string.no, null)
+                                .create()
+                                .show()
                             true
                         }
                         else -> false
                     }
                 }
             }.apply {
-                    menuProvider = this
+                menuProvider = this
             }, viewLifecycleOwner)
         }
         binding.fab.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            if (authViewModel.authenticated) {
+                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            } else {
+                AlertDialog.Builder(context)
+                    .setMessage(R.string.action_not_allowed)
+                    .setPositiveButton(R.string.sign_up) { _, _ ->
+                        findNavController().navigate(
+                            R.id.action_feedFragment_to_authFragment,
+                            Bundle().apply {
+                                textArg = getString(R.string.sign_up)
+                            }
+                        )
+                    }
+                    .setNeutralButton(R.string.sign_in) { _, _ ->
+                        findNavController().navigate(
+                            R.id.action_feedFragment_to_authFragment,
+                            Bundle().apply {
+                                textArg = getString(R.string.sign_in)
+                            }
+                        )
+                    }
+                    .setNegativeButton(R.string.no, null)
+                    .setCancelable(true)
+                    .create()
+                    .show()
+            }
         }
-
         binding.retryButton.setOnClickListener {
             viewModel.loadPosts()
         }

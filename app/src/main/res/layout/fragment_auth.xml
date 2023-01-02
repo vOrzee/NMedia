@@ -90,12 +90,32 @@
                     android:imeOptions="actionDone"
                     android:inputType="text"
                     android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/text_input_name"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/usual_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_input_password">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_edit_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_enter_name"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:maxLines="1" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/upload_avatar"
-                android:layout_width="160dp"
+                android:layout_width="240dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/usual_margin"
                 android:text="@string/upload_avatar"
@@ -120,7 +140,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/remove_photo"
-                    android:layout_width="160dp"
+                    android:layout_width="240dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal|bottom"
                     android:text="@string/remove" />
@@ -138,7 +158,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/enter_in_system"
-            android:layout_width="160dp"
+            android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:text="@string/sign_in"
             app:layout_constraintEnd_toEndOf="parent"
@@ -146,5 +166,16 @@
             app:layout_constraintTop_toBottomOf="@+id/sign_up_group_barrier"
             tools:ignore="MissingConstraints" />
 
+        <TextView
+            android:id="@+id/error_message"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/enter_in_system"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </ScrollView>

@@ -43,4 +43,12 @@
     <string name="hint_password_confirm">Repeat password</string>
     <string name="upload_avatar">Upload Avatar</string>
     <string name="error_password_not_ident">Password not ident</string>
+    <string name="are_you_suare">Are you sure?</string>
+    <string name="yes">Yup!</string>
+    <string name="no">Nope!</string>
+    <string name="eror_code">Error code</string>
+    <string name="not_pass_enter">Неверный логин или пароль</string>
+    <string name="action_not_allowed">Action not allowed for anonym</string>
+    <string name="back">Back</string>
+    <string name="hint_enter_name">Name</string>
 </resources>
