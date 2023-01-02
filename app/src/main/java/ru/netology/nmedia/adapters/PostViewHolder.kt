@@ -38,7 +38,7 @@ class PostViewHolder(
                 .circleCrop()
                 .timeout(10_000)
                 .into(avatar)
-
+            moreVert.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
             if (post.attachment != null) {
                 attachmentContent.isVisible = true
                 Glide.with(imageAttachment)

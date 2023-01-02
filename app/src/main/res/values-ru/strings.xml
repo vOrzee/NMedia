@@ -35,4 +35,7 @@
     <string name="description_select_photo">Описание к вложению</string>
     <string name="description_take_photo">Выберите фото</string>
     <string name="menu_save">Сохранить</string>
+    <string name="sign_in">Войти</string>
+    <string name="sign_up">Зарегистрироваться</string>
+    <string name="sign_out">Выйти</string>
 </resources>

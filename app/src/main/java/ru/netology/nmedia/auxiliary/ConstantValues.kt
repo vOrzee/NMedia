@@ -7,6 +7,7 @@ object ConstantValues {
     const val POST_KEY = "POST_KEY"
     val emptyPost = Post(
         id = 0,
+        authorId = 0,
         content = "",
         author = "Нетология",
         likes = 0,

@@ -12,6 +12,7 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
         with(cursor) {
             return Post(
                 id = getLong(getColumnIndexOrThrow(PostColumns.COLUMN_ID)),
+                authorId = getLong(getColumnIndexOrThrow(PostColumns.COLUMN_AUTHOR_ID)),
                 author = getString(getColumnIndexOrThrow(PostColumns.COLUMN_TITLE)),
                 content = getString(getColumnIndexOrThrow(PostColumns.COLUMN_CONTENT)),
                 published = getString(getColumnIndexOrThrow(PostColumns.COLUMN_PUBLISHED)),
@@ -21,7 +22,6 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
                 countShared = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_SHARES)),
                 viewedByMe = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_VIEW_BY_ME)) != 0,
                 countViews = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_VIEWS)),
-                //videoUrl = getString(getColumnIndexOrThrow(PostColumns.COLUMN_VIDEO_URL))
             )
         }
     }

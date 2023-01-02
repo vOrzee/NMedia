@@ -7,10 +7,12 @@ import androidx.core.net.toUri
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.BuildConfig.BASE_URL
 import ru.netology.nmedia.adapters.OnInteractionListener
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
 import ru.netology.nmedia.database.AppDbRoom
@@ -30,9 +32,21 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     )
     //private val _data = MutableLiveData(FeedModel())
     val data: LiveData<FeedModel>
-        get() = repository.data
-            .map { FeedModel(it, it.isEmpty()) }
-            .asLiveData(Dispatchers.Default)
+        get() =  AppAuth.getInstance()
+            .authStateFlow
+            .flatMapLatest { (myId, _) ->
+                repository.data
+                    .map { posts ->
+                        FeedModel(
+                            posts.map { it.copy(ownedByMe = it.authorId == myId) },
+                            posts.isEmpty()
+                        )
+                    }
+            }.asLiveData(Dispatchers.Default)
+
+//            repository.data
+//            .map { FeedModel(it, it.isEmpty()) }
+//            .asLiveData(Dispatchers.Default)
 
     private val _dataState = MutableLiveData<FeedModelState>(FeedModelState.Idle)
     val dataState: LiveData<FeedModelState>
@@ -86,7 +100,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         try {
             _dataState.value = FeedModelState.Refresh
             repository.getAllAsync()
-            _dataState.value = FeedModelState.Idle
+            _dataState.value = FeedModelState.ShadowIdle
         } catch (e: Exception) {
             _dataState.value = FeedModelState.Error
         }
@@ -106,7 +120,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 repository.getCommentsById(post)
-                _dataState.value = FeedModelState.Idle
+                _dataState.value = FeedModelState.ShadowIdle
             } catch (e: Exception) {
                 _dataState.value = FeedModelState.Error
             }

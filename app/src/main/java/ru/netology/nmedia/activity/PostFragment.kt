@@ -30,10 +30,6 @@ import java.util.*
 
 class PostFragment : Fragment() {
 
-    lateinit var podsAdapter: SimpleAdapter
-
-
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -57,6 +53,7 @@ class PostFragment : Fragment() {
                     share.isChecked = post.sharedByMe
                     view.text = translateNumber(post.countViews)
                     view.isChecked = post.viewedByMe
+                    moreVert.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
                     Glide.with(avatar)
                         .load(FloatingValue.renameUrl(post.authorAvatar ?: "", "avatars"))
                         .placeholder(R.drawable.ic_image_not_supported_24)
