@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toFile
 import androidx.core.view.isVisible
@@ -35,9 +36,9 @@ class AuthFragment : Fragment() {
 
         binding.authBlock.isVisible = true
 
-        val type = arguments?.textArg
+        val isSignIn = arguments?.textArg == getString(R.string.sign_in)
 
-        if (type == getString(R.string.sign_in)) {
+        if (isSignIn) {
             binding.signUpGroup.visibility = View.GONE
         } else {
             binding.signUpGroup.visibility = View.VISIBLE
@@ -84,10 +85,24 @@ class AuthFragment : Fragment() {
 
         with(binding) {
 
-            binding.removePhoto.setOnClickListener {
+            removePhoto.setOnClickListener {
                 //viewModel.deleteAttachment()
                 viewModel.changePhoto(null, null)
             }
+            enterInSystem.setOnClickListener {
+                if (isSignIn) {
+                    inputEditPasswordConfirm.text = inputEditPassword.text
+                    Toast.makeText(requireContext(),inputEditPassword.text,Toast.LENGTH_SHORT).show()
+                } else {
+                    if (inputEditPasswordConfirm.text.toString() != inputEditPassword.text.toString()) {
+                        Toast.makeText(requireContext(),
+                            R.string.error_password_not_ident,
+                            Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+                }
+            }
+
             return root
         }
 

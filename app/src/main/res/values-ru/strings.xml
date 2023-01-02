@@ -42,4 +42,5 @@
     <string name="hint_password">Пароль</string>
     <string name="hint_password_confirm">Повторите пароль</string>
     <string name="upload_avatar">Загрузить аватар</string>
+    <string name="error_password_not_ident">Введёные пароли не совпадают</string>
 </resources>
