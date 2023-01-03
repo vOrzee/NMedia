@@ -1,5 +1,6 @@
 package ru.netology.nmedia.activity
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -15,6 +16,9 @@ import androidx.fragment.app.viewModels
 import ru.netology.nmedia.R
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import ru.netology.nmedia.adapters.CommentAdapter
+import ru.netology.nmedia.adapters.OnInteractionListener
+import ru.netology.nmedia.adapters.OnInteractionListenerComment
 import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
@@ -24,6 +28,7 @@ import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.NumberTranslator.translateNumber
 import ru.netology.nmedia.databinding.FragmentPostBinding
 import ru.netology.nmedia.dto.AttachmentType
+import ru.netology.nmedia.dto.Comment
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 import java.text.SimpleDateFormat
@@ -43,6 +48,38 @@ class PostFragment : Fragment() {
 
         var menuProvider: MenuProvider? = null
 
+        val adapter = CommentAdapter(object : OnInteractionListenerComment {
+            override fun onLike(comment: Comment) {
+                if (authViewModel.authenticated) {
+                    //TODO пока недоступно
+                    //viewModel.likeByIdComment(comment)
+                } else {
+                    AlertDialog.Builder(context)
+                        .setMessage(R.string.action_not_allowed)
+                        .setPositiveButton(R.string.sign_up) { _, _ ->
+                            findNavController().navigate(
+                                R.id.action_postFragment_to_authFragment,
+                                Bundle().apply {
+                                    textArg = getString(R.string.sign_up)
+                                }
+                            )
+                        }
+                        .setNeutralButton(R.string.sign_in) { _, _ ->
+                            findNavController().navigate(
+                                R.id.action_postFragment_to_authFragment,
+                                Bundle().apply {
+                                    textArg = getString(R.string.sign_in)
+                                }
+                            )
+                        }
+                        .setNegativeButton(R.string.no, null)
+                        .setCancelable(true)
+                        .create()
+                        .show()
+                }
+            }
+        })
+
         authViewModel.data.observe(viewLifecycleOwner) {
             menuProvider?.let(requireActivity()::removeMenuProvider)
             requireActivity().addMenuProvider(object : MenuProvider {
@@ -57,10 +94,8 @@ class PostFragment : Fragment() {
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                     return when (menuItem.itemId) {
                         R.id.signin -> {
-                            // TODO: just hardcode it, implementation must be in homework
-                            AppAuth.getInstance().setAuth(5, "x-token")
                             findNavController().navigate(
-                                R.id.action_feedFragment_to_authFragment,
+                                R.id.action_postFragment_to_authFragment,
                                 Bundle().apply {
                                     textArg = getString(R.string.sign_in)
                                 }
@@ -68,10 +103,8 @@ class PostFragment : Fragment() {
                             true
                         }
                         R.id.signup -> {
-                            // TODO: just hardcode it, implementation must be in homework
-                            AppAuth.getInstance().setAuth(5, "x-token")
                             findNavController().navigate(
-                                R.id.action_feedFragment_to_authFragment,
+                                R.id.action_postFragment_to_authFragment,
                                 Bundle().apply {
                                     textArg = getString(R.string.sign_up)
                                 }
@@ -79,7 +112,15 @@ class PostFragment : Fragment() {
                             true
                         }
                         R.id.signout -> {
-                            AppAuth.getInstance().removeAuth()
+                            AlertDialog.Builder(requireActivity())
+                                .setTitle(R.string.are_you_suare)
+                                .setPositiveButton(R.string.yes) { _, _ ->
+                                    AppAuth.getInstance().removeAuth()
+                                }
+                                .setCancelable(true)
+                                .setNegativeButton(R.string.no, null)
+                                .create()
+                                .show()
                             true
                         }
                         else -> false
@@ -89,6 +130,7 @@ class PostFragment : Fragment() {
                 menuProvider = this
             }, viewLifecycleOwner)
         }
+        binding.listComment.adapter = adapter
         with(binding.singlePost) {
             viewModel.data.observe(viewLifecycleOwner) { state ->
                 val posts = state.posts
@@ -182,11 +224,16 @@ class PostFragment : Fragment() {
                 }
             }
         }
+        val comments:MutableList<Comment> = mutableListOf()
         with(binding.listComment) {
             viewModel.data.observe(viewLifecycleOwner) { state ->
                 state.posts.find { it.id == arguments?.longArg }
                     ?.let { viewModel.getCommentsById(it) }
-                //TODO комментарии считываются, сохраняются, осталось добавить отображение
+                //TODO пока комментарии только отображаются
+            }
+
+            viewModel.dataComment.observe(viewLifecycleOwner) {
+                adapter.submitList(it)
             }
         }
         return binding.root

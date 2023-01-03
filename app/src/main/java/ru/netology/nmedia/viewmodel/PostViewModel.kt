@@ -16,6 +16,7 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
 import ru.netology.nmedia.database.AppDbRoom
+import ru.netology.nmedia.dto.Comment
 import ru.netology.nmedia.dto.MediaUpload
 //import ru.netology.nmedia.database.AppDbRoom
 import ru.netology.nmedia.dto.Post
@@ -44,6 +45,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     }
             }.asLiveData(Dispatchers.Default)
 
+
 //            repository.data
 //            .map { FeedModel(it, it.isEmpty()) }
 //            .asLiveData(Dispatchers.Default)
@@ -55,6 +57,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
         get() = _postCreated
+
+    val dataComment: LiveData<List<Comment>>
+        get() = _dataComment
+    private val _dataComment:MutableLiveData<List<Comment>> = MutableLiveData(listOf())
+
     private val _photo = MutableLiveData(
         PhotoModel(edited.value?.attachment?.url?.toUri(), edited.value?.attachment?.url?.toUri()?.toFile())
         ?: noPhoto
@@ -119,7 +126,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun getCommentsById(post: Post) {
         viewModelScope.launch {
             try {
-                repository.getCommentsById(post)
+                _dataComment.value = repository.getCommentsById(post)
                 _dataState.value = FeedModelState.ShadowIdle
             } catch (e: Exception) {
                 _dataState.value = FeedModelState.Error
@@ -163,14 +170,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun save() {
-        edited.value?.let {
+        edited.value?.let { savingPost ->
             _postCreated.value = Unit
             viewModelScope.launch {
                 try {
                     when(_photo.value) {
-                        noPhoto -> repository.saveAsync(it)
+                        noPhoto -> repository.saveAsync(savingPost)
                         else -> _photo.value?.file?.let { file ->
-                            repository.saveWithAttachment(it, MediaUpload(file))
+                            repository.saveWithAttachment(savingPost, MediaUpload(file))
                         }
                     }
                     _dataState.value = FeedModelState.Idle

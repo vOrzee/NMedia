@@ -137,6 +137,7 @@ class FeedFragment : Fragment() {
             adapter.submitList(it.posts)
             binding.emptyText.isVisible = it.empty
         }
+
         viewModel.dataState.observe(viewLifecycleOwner) {
             binding.progress.isVisible = it is FeedModelState.Loading
             binding.swipe.isRefreshing = it is FeedModelState.Refresh
