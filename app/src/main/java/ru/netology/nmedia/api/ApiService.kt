@@ -1,21 +1,16 @@
 package ru.netology.nmedia.api
 
-import android.media.session.MediaSession
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.dto.Comment
-import ru.netology.nmedia.dto.Media
-import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.dto.Token
+import ru.netology.nmedia.dto.*
 
 const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/"
 
@@ -44,7 +39,7 @@ private val retrofit = Retrofit.Builder()
     .client(okhttp)
     .build()
 
-interface PostsApiService {
+interface ApiService {
     @GET("posts")
     suspend fun getAll(): Response<List<Post>>
 
@@ -79,7 +74,11 @@ interface PostsApiService {
 
     @FormUrlEncoded
     @POST("users/registration")
-    suspend fun register(@Field("login") login: String, @Field("pass") pass: String, @Field("name") name: String): Response<Token>
+    suspend fun register(
+        @Field("login") login: String,
+        @Field("pass") pass: String,
+        @Field("name") name: String
+    ): Response<Token>
 
     @Multipart
     @POST("users/registration")
@@ -89,10 +88,13 @@ interface PostsApiService {
         @Part("name") name: RequestBody,
         @Part media: MultipartBody.Part,
     ): Response<Token>
+
+    @POST("users/push-tokens")
+    suspend fun save(@Body pushToken: PushToken): Response<Unit>
 }
 
-object PostsApi {
-    val retrofitService: PostsApiService by lazy {
-        retrofit.create(PostsApiService::class.java)
+object Api {
+    val retrofitService: ApiService by lazy {
+        retrofit.create(ApiService::class.java)
     }
 }

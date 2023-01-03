@@ -62,6 +62,9 @@ class NewPostFragment : Fragment() {
 //                .placeholder(R.drawable.not_image_1000)
 //                .timeout(10_000)
 //                .into(photo)
+//            if (viewModel.getEditedPostImgRes().isNullOrBlank()) {
+//                binding.photoContainer.visibility = View.VISIBLE
+//            }
 
             viewModel.photo.observe(viewLifecycleOwner) {
                 if (it.uri == null /*&& viewModel.getEditedPostImgRes().isNullOrBlank()*/) {
@@ -72,12 +75,6 @@ class NewPostFragment : Fragment() {
                 binding.photoContainer.visibility = View.VISIBLE
                 binding.photo.setImageURI(it.uri)
             }
-
-//            if (viewModel.getEditedPostImgRes().isNullOrBlank()) {
-//                binding.photoContainer.visibility = View.VISIBLE
-//            }
-
-
 
             requireActivity().addMenuProvider(object : MenuProvider {
                 override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
