@@ -27,11 +27,6 @@ class PostRepositoryImpl(private val dao: PostDaoRoom) : PostRepository {
     private val newerPostsId = mutableListOf<Long>()
 
     override val data = dao.getAll()
-        .map {
-            it.filter { postEntity ->
-                !postEntity.isNew
-            }
-        }
         .map(List<PostEntity>::toDto)
         .flowOn(Dispatchers.Default)
 
