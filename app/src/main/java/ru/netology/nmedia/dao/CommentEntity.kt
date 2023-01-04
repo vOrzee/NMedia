@@ -13,6 +13,7 @@ data class CommentEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
     val postId: Long,
+    val authorId: Long,
     val author: String,
     val authorAvatar: String = "",
     val content: String,
@@ -22,13 +23,13 @@ data class CommentEntity(
 ) {
 
     fun toDto() = Comment(
-        id, postId, author, authorAvatar, content, published, likedByMe, likes,
+        id, postId, authorId, author, authorAvatar, content, published, likedByMe, likes,
     )
 
     companion object {
         fun fromDto(dto: Comment) =
             CommentEntity(
-                dto.id, dto.postId, dto.author, dto.authorAvatar, dto.content, dto.published, dto.likedByMe, dto.likes,
+                dto.id, dto.postId, dto.authorId, dto.author, dto.authorAvatar, dto.content, dto.published, dto.likedByMe, dto.likes,
             )
     }
 }

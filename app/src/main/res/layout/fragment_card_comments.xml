@@ -5,6 +5,7 @@
     android:id="@+id/post_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="@dimen/usual_margin"
     android:padding="8dp"
     tools:context=".activity.FeedFragment">
 

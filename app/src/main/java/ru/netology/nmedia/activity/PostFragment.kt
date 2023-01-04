@@ -1,14 +1,14 @@
 package ru.netology.nmedia.activity
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ListView
 import android.widget.PopupMenu
 import android.widget.SimpleAdapter
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -16,7 +16,11 @@ import androidx.fragment.app.viewModels
 import ru.netology.nmedia.R
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import ru.netology.nmedia.adapters.CommentAdapter
+import ru.netology.nmedia.adapters.OnInteractionListener
+import ru.netology.nmedia.adapters.OnInteractionListenerComment
 import ru.netology.nmedia.adapters.PostAdapter
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue
@@ -24,15 +28,13 @@ import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.NumberTranslator.translateNumber
 import ru.netology.nmedia.databinding.FragmentPostBinding
 import ru.netology.nmedia.dto.AttachmentType
+import ru.netology.nmedia.dto.Comment
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 class PostFragment : Fragment() {
-
-    lateinit var podsAdapter: SimpleAdapter
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +44,93 @@ class PostFragment : Fragment() {
         val binding = FragmentPostBinding.inflate(layoutInflater)
         val viewModel: PostViewModel by activityViewModels()
 
+        val authViewModel: AuthViewModel by viewModels()
+
+        var menuProvider: MenuProvider? = null
+
+        val adapter = CommentAdapter(object : OnInteractionListenerComment {
+            override fun onLike(comment: Comment) {
+                if (authViewModel.authenticated) {
+                    //TODO пока недоступно
+                    //viewModel.likeByIdComment(comment)
+                } else {
+                    AlertDialog.Builder(context)
+                        .setMessage(R.string.action_not_allowed)
+                        .setPositiveButton(R.string.sign_up) { _, _ ->
+                            findNavController().navigate(
+                                R.id.action_postFragment_to_authFragment,
+                                Bundle().apply {
+                                    textArg = getString(R.string.sign_up)
+                                }
+                            )
+                        }
+                        .setNeutralButton(R.string.sign_in) { _, _ ->
+                            findNavController().navigate(
+                                R.id.action_postFragment_to_authFragment,
+                                Bundle().apply {
+                                    textArg = getString(R.string.sign_in)
+                                }
+                            )
+                        }
+                        .setNegativeButton(R.string.no, null)
+                        .setCancelable(true)
+                        .create()
+                        .show()
+                }
+            }
+        })
+
+        authViewModel.data.observe(viewLifecycleOwner) {
+            menuProvider?.let(requireActivity()::removeMenuProvider)
+            requireActivity().addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_main, menu)
+
+                    menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
+                    menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
+
+                }
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    return when (menuItem.itemId) {
+                        R.id.signin -> {
+                            findNavController().navigate(
+                                R.id.action_postFragment_to_authFragment,
+                                Bundle().apply {
+                                    textArg = getString(R.string.sign_in)
+                                }
+                            )
+                            true
+                        }
+                        R.id.signup -> {
+                            findNavController().navigate(
+                                R.id.action_postFragment_to_authFragment,
+                                Bundle().apply {
+                                    textArg = getString(R.string.sign_up)
+                                }
+                            )
+                            true
+                        }
+                        R.id.signout -> {
+                            AlertDialog.Builder(requireActivity())
+                                .setTitle(R.string.are_you_suare)
+                                .setPositiveButton(R.string.yes) { _, _ ->
+                                    AppAuth.getInstance().removeAuth()
+                                }
+                                .setCancelable(true)
+                                .setNegativeButton(R.string.no, null)
+                                .create()
+                                .show()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+            }.apply {
+                menuProvider = this
+            }, viewLifecycleOwner)
+        }
+        binding.listComment.adapter = adapter
         with(binding.singlePost) {
             viewModel.data.observe(viewLifecycleOwner) { state ->
                 val posts = state.posts
@@ -57,6 +146,7 @@ class PostFragment : Fragment() {
                     share.isChecked = post.sharedByMe
                     view.text = translateNumber(post.countViews)
                     view.isChecked = post.viewedByMe
+                    moreVert.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
                     Glide.with(avatar)
                         .load(FloatingValue.renameUrl(post.authorAvatar ?: "", "avatars"))
                         .placeholder(R.drawable.ic_image_not_supported_24)
@@ -134,11 +224,16 @@ class PostFragment : Fragment() {
                 }
             }
         }
+        val comments:MutableList<Comment> = mutableListOf()
         with(binding.listComment) {
             viewModel.data.observe(viewLifecycleOwner) { state ->
                 state.posts.find { it.id == arguments?.longArg }
                     ?.let { viewModel.getCommentsById(it) }
-                //TODO комментарии считываются, сохраняются, осталось добавить отображение
+                //TODO пока комментарии только отображаются
+            }
+
+            viewModel.dataComment.observe(viewLifecycleOwner) {
+                adapter.submitList(it)
             }
         }
         return binding.root

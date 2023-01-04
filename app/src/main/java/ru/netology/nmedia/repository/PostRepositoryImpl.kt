@@ -97,7 +97,6 @@ class PostRepositoryImpl(private val dao: PostDaoRoom) : PostRepository {
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
-
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.save(PostEntity.fromDto(body))
         } catch (e: IOException) {
@@ -167,7 +166,7 @@ class PostRepositoryImpl(private val dao: PostDaoRoom) : PostRepository {
         }
     }
 
-    override suspend fun getCommentsById(post: Post) {
+    override suspend fun getCommentsById(post: Post) : List<Comment> {
         try {
             val response = PostsApi.retrofitService.getCommentsById(post.id)
 
@@ -177,6 +176,7 @@ class PostRepositoryImpl(private val dao: PostDaoRoom) : PostRepository {
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insertCommentsPost(body.toEntity())
+            return body
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {

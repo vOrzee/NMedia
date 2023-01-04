@@ -1,15 +1,14 @@
 package ru.netology.nmedia.activity
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.*
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
@@ -18,12 +17,15 @@ import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.adapters.PostAdapter
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
+import ru.netology.nmedia.auxiliary.FloatingValue.showRegistrationDialog
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModelState
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -32,11 +34,38 @@ class FeedFragment : Fragment() {
 
     val viewModel: PostViewModel by activityViewModels()
 
+    val authViewModel: AuthViewModel by viewModels()
+
 
     private val interactionListener = object : OnInteractionListener {
 
         override fun onLike(post: Post) {
-            viewModel.likeById(post)
+            if (authViewModel.authenticated) {
+                viewModel.likeById(post)
+            } else {
+                AlertDialog.Builder(context)
+                    .setMessage(R.string.action_not_allowed)
+                    .setPositiveButton(R.string.sign_up) { _, _ ->
+                        findNavController().navigate(
+                            R.id.action_feedFragment_to_authFragment,
+                            Bundle().apply {
+                                textArg = getString(R.string.sign_up)
+                            }
+                        )
+                    }
+                    .setNeutralButton(R.string.sign_in) { _, _ ->
+                        findNavController().navigate(
+                            R.id.action_feedFragment_to_authFragment,
+                            Bundle().apply {
+                                textArg = getString(R.string.sign_in)
+                            }
+                        )
+                    }
+                    .setNegativeButton(R.string.no, null)
+                    .setCancelable(true)
+                    .create()
+                    .show()
+            }
         }
 
         override fun onShare(post: Post) {
@@ -108,6 +137,7 @@ class FeedFragment : Fragment() {
             adapter.submitList(it.posts)
             binding.emptyText.isVisible = it.empty
         }
+
         viewModel.dataState.observe(viewLifecycleOwner) {
             binding.progress.isVisible = it is FeedModelState.Loading
             binding.swipe.isRefreshing = it is FeedModelState.Refresh
@@ -121,10 +151,87 @@ class FeedFragment : Fragment() {
             }
         }
 
-        binding.fab.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
-        }
 
+        var menuProvider: MenuProvider? = null
+
+        authViewModel.data.observe(viewLifecycleOwner) {
+            menuProvider?.let(requireActivity()::removeMenuProvider)
+            requireActivity().addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_main, menu)
+
+                    menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
+                    menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
+
+                }
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    return when (menuItem.itemId) {
+                        R.id.signin -> {
+                            findNavController().navigate(
+                                R.id.action_feedFragment_to_authFragment,
+                                Bundle().apply {
+                                    textArg = getString(R.string.sign_in)
+                                }
+                            )
+                            true
+                        }
+                        R.id.signup -> {
+                            findNavController().navigate(
+                                R.id.action_feedFragment_to_authFragment,
+                                Bundle().apply {
+                                    textArg = getString(R.string.sign_up)
+                                }
+                            )
+                            true
+                        }
+                        R.id.signout -> {
+                            AlertDialog.Builder(requireActivity())
+                                .setTitle(R.string.are_you_suare)
+                                .setPositiveButton(R.string.yes) { _, _ ->
+                                    AppAuth.getInstance().removeAuth()
+                                }
+                                .setCancelable(true)
+                                .setNegativeButton(R.string.no, null)
+                                .create()
+                                .show()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+            }.apply {
+                menuProvider = this
+            }, viewLifecycleOwner)
+        }
+        binding.fab.setOnClickListener {
+            if (authViewModel.authenticated) {
+                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            } else {
+                AlertDialog.Builder(context)
+                    .setMessage(R.string.action_not_allowed)
+                    .setPositiveButton(R.string.sign_up) { _, _ ->
+                        findNavController().navigate(
+                            R.id.action_feedFragment_to_authFragment,
+                            Bundle().apply {
+                                textArg = getString(R.string.sign_up)
+                            }
+                        )
+                    }
+                    .setNeutralButton(R.string.sign_in) { _, _ ->
+                        findNavController().navigate(
+                            R.id.action_feedFragment_to_authFragment,
+                            Bundle().apply {
+                                textArg = getString(R.string.sign_in)
+                            }
+                        )
+                    }
+                    .setNegativeButton(R.string.no, null)
+                    .setCancelable(true)
+                    .create()
+                    .show()
+            }
+        }
         binding.retryButton.setOnClickListener {
             viewModel.loadPosts()
         }
@@ -135,7 +242,7 @@ class FeedFragment : Fragment() {
 
         binding.newerCount.setOnClickListener {
             binding.newerCount.isVisible = false
-            CoroutineScope(EmptyCoroutineContext).launch{
+            CoroutineScope(EmptyCoroutineContext).launch {
                 launch {
                     viewModel.viewNewPosts()
                     delay(25) // без delay прокручивает раньше, не смотря на join
@@ -145,7 +252,7 @@ class FeedFragment : Fragment() {
         }
 
         viewModel.newerCount.observe(viewLifecycleOwner) { state ->
-            binding.newerCount.isVisible = state>0
+            binding.newerCount.isVisible = state > 0
         }
 
         return binding.root

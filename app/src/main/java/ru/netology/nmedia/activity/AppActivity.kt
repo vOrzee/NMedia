@@ -2,6 +2,7 @@ package ru.netology.nmedia.activity
 
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -9,12 +10,20 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.FloatingValue.textNewPost
+import ru.netology.nmedia.viewmodel.AuthViewModel
 
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
+
+    private val viewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+
+        viewModel.data.observe(this) {
+            invalidateOptionsMenu()
+        }
+
         checkGoogleApiAvailability()
     }
 
