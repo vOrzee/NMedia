@@ -11,6 +11,17 @@ interface PostDaoRoom {
     @Query("SELECT * FROM PostEntity WHERE isNew = 0 ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
 
+    @Query(
+        """
+        SELECT * FROM CommentEntity
+        WHERE postId = :id
+        """
+    )
+    fun getCommentsByPost(id: Long): Flow<List<CommentEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCommentsPost(comment: List<CommentEntity>)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)
 

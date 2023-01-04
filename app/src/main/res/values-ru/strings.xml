@@ -29,4 +29,10 @@
     <string name="on_success">Успешно</string>
     <string name="on_failure">Не шмогло!</string>
     <string name="newer_posts">Свежие записи</string>
+    <string name="play_video">Запустить видео</string>
+    <string name="description_photo">Описание фото</string>
+    <string name="remove">Удалить</string>
+    <string name="description_select_photo">Описание к вложению</string>
+    <string name="description_take_photo">Выберите фото</string>
+    <string name="menu_save">Сохранить</string>
 </resources>

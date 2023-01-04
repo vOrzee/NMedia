@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.*
-import ru.netology.nmedia.dao.PostDaoRoom
-import ru.netology.nmedia.dao.PostEntity
-import ru.netology.nmedia.dao.toDto
-import ru.netology.nmedia.dao.toEntity
-import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dao.*
+import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import kotlin.coroutines.EmptyCoroutineContext
@@ -107,6 +107,45 @@ class PostRepositoryImpl(private val dao: PostDaoRoom) : PostRepository {
         }
     }
 
+    override suspend fun saveWithAttachment(post: Post, upload: MediaUpload) {
+        try {
+            val media = upload(upload)
+            // TODO: add support for other types
+            val postWithAttachment = post.copy(attachment =
+            Attachment(
+                url = media.id,
+                type = AttachmentType.IMAGE,
+                description = null
+            ))
+            saveAsync(postWithAttachment)
+        } catch (e: AppError) {
+            throw e
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun upload(upload: MediaUpload): Media {
+        try {
+            val media = MultipartBody.Part.createFormData(
+                "file", upload.file.name, upload.file.asRequestBody()
+            )
+
+            val response = PostsApi.retrofitService.upload(media)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            return response.body() ?: throw ApiError(response.code(), response.message())
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
     override suspend fun likeByIdAsync(post: Post) {
         dao.likeById(post.id)
         try {
@@ -121,6 +160,23 @@ class PostRepositoryImpl(private val dao: PostDaoRoom) : PostRepository {
             }
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insert(PostEntity.fromDto(body))
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun getCommentsById(post: Post) {
+        try {
+            val response = PostsApi.retrofitService.getCommentsById(post.id)
+
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            dao.insertCommentsPost(body.toEntity())
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {

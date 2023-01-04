@@ -1,18 +1,29 @@
 package ru.netology.nmedia.activity
 
+import android.app.Activity
+import android.net.Uri
 import android.opengl.Visibility
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toFile
+import androidx.core.net.toUri
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.github.dhaval2404.imagepicker.ImagePicker
+import com.github.dhaval2404.imagepicker.constant.ImageProvider
+import com.google.android.material.snackbar.Snackbar
+import ru.netology.nmedia.R
+import ru.netology.nmedia.auxiliary.AndroidUtils
 import ru.netology.nmedia.auxiliary.AndroidUtils.hideKeyboard
 import ru.netology.nmedia.auxiliary.AndroidUtils.showKeyboard
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
+import ru.netology.nmedia.auxiliary.FloatingValue
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.FloatingValue.textNewPost
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
@@ -24,11 +35,16 @@ class NewPostFragment : Fragment() {
     private val binding by lazy { FragmentNewPostBinding.inflate(layoutInflater) }
     private val viewModel: PostViewModel by activityViewModels()
 
+    private var fragmentBinding: FragmentNewPostBinding? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        fragmentBinding = binding
+
         with(binding) {
 
             arguments?.textArg?.let {
@@ -41,6 +57,47 @@ class NewPostFragment : Fragment() {
 
             edit.requestFocus()
 
+//            Glide.with(photo)
+//                .load(FloatingValue.renameUrl(viewModel.getEditedPostImgRes() ?: "", "media"))
+//                .placeholder(R.drawable.not_image_1000)
+//                .timeout(10_000)
+//                .into(photo)
+
+            viewModel.photo.observe(viewLifecycleOwner) {
+                if (it.uri == null /*&& viewModel.getEditedPostImgRes().isNullOrBlank()*/) {
+                    binding.photoContainer.visibility = View.GONE
+                    return@observe
+                }
+
+                binding.photoContainer.visibility = View.VISIBLE
+                binding.photo.setImageURI(it.uri)
+            }
+
+//            if (viewModel.getEditedPostImgRes().isNullOrBlank()) {
+//                binding.photoContainer.visibility = View.VISIBLE
+//            }
+
+
+
+            requireActivity().addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_new_post, menu)
+                }
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
+                    when (menuItem.itemId) {
+                        R.id.save -> {
+                            fragmentBinding?.let {
+                                viewModel.changeContent(it.edit.text.toString())
+                                viewModel.save()
+                                hideKeyboard(requireView())
+                            }
+                            true
+                        }
+                        else -> false
+                    }
+
+            }, viewLifecycleOwner)
 
             clickListeners()
 
@@ -54,20 +111,52 @@ class NewPostFragment : Fragment() {
     }
 
     private fun clickListeners() {
+
+        val pickPhotoLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                when (it.resultCode) {
+                    ImagePicker.RESULT_ERROR -> {
+                        Snackbar.make(
+                            binding.root,
+                            ImagePicker.getError(it.data),
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    }
+                    Activity.RESULT_OK -> {
+                        val uri: Uri? = it.data?.data
+                        viewModel.changePhoto(uri, uri?.toFile())
+                    }
+                }
+            }
+        binding.pickPhoto.setOnClickListener {
+            ImagePicker.with(this)
+                .crop()
+                .compress(2048)
+                .provider(ImageProvider.GALLERY)
+                .galleryMimeTypes(
+                    arrayOf(
+                        "image/png",
+                        "image/jpeg",
+                    )
+                )
+                .createIntent(pickPhotoLauncher::launch)
+        }
+
+        binding.takePhoto.setOnClickListener {
+            ImagePicker.with(this)
+                .crop()
+                .compress(2048)
+                .provider(ImageProvider.CAMERA)
+                .createIntent(pickPhotoLauncher::launch)
+        }
+
+        binding.removePhoto.setOnClickListener {
+            //viewModel.deleteAttachment()
+            viewModel.changePhoto(null, null)
+        }
+
         with(binding) {
 
-            fabComplete.setOnClickListener {
-                if (!edit.text.isNullOrBlank()) {
-                    val content = edit.text.toString()
-                    viewModel.changeContent(content)
-                    viewModel.save()
-                }
-                hideKeyboard(root)
-                fabComplete.isVisible = false
-                fabCancel.isVisible = false
-                edit.isVisible = false
-                savingProgressBar.isVisible = true
-            }
             viewModel.postCreated.observe(viewLifecycleOwner) {
                 viewModel.loadPosts()
                 findNavController().navigateUp()
@@ -85,5 +174,10 @@ class NewPostFragment : Fragment() {
             }
 
         }
+    }
+
+    override fun onDestroyView() {
+        fragmentBinding = null
+        super.onDestroyView()
     }
 }

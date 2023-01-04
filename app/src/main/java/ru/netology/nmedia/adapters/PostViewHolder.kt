@@ -42,7 +42,7 @@ class PostViewHolder(
             if (post.attachment != null) {
                 attachmentContent.isVisible = true
                 Glide.with(imageAttachment)
-                    .load(renameUrl(post.attachment.url,"images"))
+                    .load(renameUrl(post.attachment.url,"media"))
                     .placeholder(R.drawable.not_image_1000)
                     .timeout(10_000)
                     .into(imageAttachment)
@@ -76,6 +76,10 @@ class PostViewHolder(
             }
             playButtonVideoPost.setOnClickListener {
                 onInteractionListener.onPlayVideo(post)
+            }
+
+            imageAttachment.setOnClickListener {
+                onInteractionListener.onPreviewAttachment(post)
             }
             moreVert.setOnClickListener {
                 val popupMenu = PopupMenu(it.context, it)

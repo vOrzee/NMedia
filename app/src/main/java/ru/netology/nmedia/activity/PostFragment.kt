@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ListView
 import android.widget.PopupMenu
+import android.widget.SimpleAdapter
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -14,6 +16,7 @@ import androidx.fragment.app.viewModels
 import ru.netology.nmedia.R
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue
@@ -27,6 +30,10 @@ import java.util.*
 
 class PostFragment : Fragment() {
 
+    lateinit var podsAdapter: SimpleAdapter
+
+
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,7 +42,7 @@ class PostFragment : Fragment() {
         val binding = FragmentPostBinding.inflate(layoutInflater)
         val viewModel: PostViewModel by activityViewModels()
 
-        with(binding.scrollContent) {
+        with(binding.singlePost) {
             viewModel.data.observe(viewLifecycleOwner) { state ->
                 val posts = state.posts
                 val post = posts.find { it.id == arguments?.longArg }
@@ -60,7 +67,7 @@ class PostFragment : Fragment() {
                     if (post.attachment != null) {
                         attachmentContent.visibility = View.VISIBLE
                         Glide.with(imageAttachment)
-                            .load(FloatingValue.renameUrl(post.attachment.url, "images"))
+                            .load(FloatingValue.renameUrl(post.attachment.url, "media"))
                             .placeholder(R.drawable.not_image_1000)
                             .timeout(10_000)
                             .into(imageAttachment)
@@ -91,7 +98,7 @@ class PostFragment : Fragment() {
 
                     moreVert.setOnClickListener {
                         val popupMenu =
-                            PopupMenu(binding.root.context, binding.scrollContent.moreVert)
+                            PopupMenu(binding.root.context, binding.singlePost.moreVert)
                         popupMenu.apply {
                             inflate(R.menu.options_post)
                             setOnMenuItemClickListener {
@@ -125,6 +132,13 @@ class PostFragment : Fragment() {
                         }
                     }
                 }
+            }
+        }
+        with(binding.listComment) {
+            viewModel.data.observe(viewLifecycleOwner) { state ->
+                state.posts.find { it.id == arguments?.longArg }
+                    ?.let { viewModel.getCommentsById(it) }
+                //TODO комментарии считываются, сохраняются, осталось добавить отображение
             }
         }
         return binding.root

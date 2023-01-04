@@ -2,6 +2,7 @@ package ru.netology.nmedia.auxiliary
 
 import android.os.Bundle
 import ru.netology.nmedia.auxiliary.ConstantValues.POST_KEY
+import ru.netology.nmedia.dto.Post
 
 
 class Companion {

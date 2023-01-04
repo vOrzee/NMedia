@@ -63,6 +63,7 @@ class FeedFragment : Fragment() {
                 Bundle().apply {
                     textArg = post.content
                 })
+
         }
 
         override fun onPlayVideo(post: Post) {
@@ -77,6 +78,14 @@ class FeedFragment : Fragment() {
                 R.id.action_feedFragment_to_postFragment,
                 Bundle().apply {
                     longArg = post.id
+                })
+        }
+
+        override fun onPreviewAttachment(post: Post) {
+            findNavController().navigate(
+                R.id.action_feedFragment_to_viewImageAttach,
+                Bundle().apply {
+                    textArg = post.attachment?.url
                 })
         }
     }
