@@ -4,12 +4,15 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.auth.AuthState
 import kotlin.random.Random
 
 class FCMService : FirebaseMessagingService() {
@@ -48,7 +51,32 @@ class FCMService : FirebaseMessagingService() {
                     )
                 )
             }
+            return
         }
+        val  testInputPushValue = message.data.values.map {
+            gson.fromJson(it, Test::class.java)
+        }[0]
+        val myId = AppAuth.getInstance().authStateFlow.value.id
+        when {
+            testInputPushValue.recipientId == myId -> {
+                handleTestAction(testInputPushValue,"Персональная рассылка")
+            }
+            testInputPushValue.recipientId == null -> {
+                handleTestAction(testInputPushValue,"Массовая рассылка")
+            }
+            testInputPushValue.recipientId == 0L  -> {
+                println("сервер считает, что у нас анонимная аутентификация, переотправляем токен")
+                AppAuth.getInstance().sendPushToken()
+            }
+            testInputPushValue.recipientId != 0L -> {
+                println("сервер считает, что у на нашем устройстве другая аутентификация, переотправляем токен")
+                AppAuth.getInstance().sendPushToken()
+            }
+        }
+    }
+
+    override fun onNewToken(token: String) {
+        AppAuth.getInstance().sendPushToken(token)
     }
 
     private fun handleLike(content: Like) {
@@ -106,8 +134,19 @@ class FCMService : FirebaseMessagingService() {
             .notify(Random.nextInt(100_000), notification)
     }
 
-    override fun onNewToken(token: String) {
-        println(token)
+    private fun handleTestAction(content: Test, message: String) {
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.netology_foreground)
+            .setContentTitle(content.content)
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(message)
+            )
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        NotificationManagerCompat.from(this)
+            .notify(Random.nextInt(100_000), notification)
     }
 
     enum class Action {
@@ -125,5 +164,10 @@ class FCMService : FirebaseMessagingService() {
     data class NewPost(
         val userName: String,
         val textPost: String
+    )
+
+    data class Test(
+        val recipientId: Long? = null,
+        val content: String
     )
 }

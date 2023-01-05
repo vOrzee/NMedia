@@ -92,8 +92,8 @@ class AuthFragment : Fragment() {
             binding.photo.setImageURI(it.uri)
         }
 
-        viewModel.dataState.observe(viewLifecycleOwner){
-            when(it) {
+        viewModel.dataState.observe(viewLifecycleOwner) {
+            when (it) {
                 0 -> findNavController().navigateUp()
                 -1 -> {
                     binding.errorMessage.visibility = View.GONE
@@ -123,14 +123,16 @@ class AuthFragment : Fragment() {
                     val login = binding.inputEditLogin.text.toString()
                     val pass = binding.inputEditPassword.text.toString()
                     scope.launch {
-                        viewModel.login(login,pass)
+                        viewModel.login(login, pass)
                     }
 
                 } else {
                     if (inputEditPasswordConfirm.text.toString() != inputEditPassword.text.toString()) {
-                        Toast.makeText(requireContext(),
+                        Toast.makeText(
+                            requireContext(),
                             R.string.error_password_not_ident,
-                            Toast.LENGTH_SHORT).show()
+                            Toast.LENGTH_SHORT
+                        ).show()
                         return@setOnClickListener
                     } else {
                         val scope = CoroutineScope(EmptyCoroutineContext)
@@ -139,7 +141,7 @@ class AuthFragment : Fragment() {
                         val name = binding.inputEditName.text.toString()
                         val photo = viewModel.photo.value?.file?.let { file -> MediaUpload(file) }
                         scope.launch {
-                            viewModel.registerWithPhoto(login,pass,name,photo)
+                            viewModel.registerWithPhoto(login, pass, name, photo)
                         }
                     }
                 }

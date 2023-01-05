@@ -3,25 +3,17 @@ package ru.netology.nmedia.viewmodel
 import android.net.Uri
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.internal.notify
-import okhttp3.internal.notifyAll
-import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.api.Api
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Token
-import ru.netology.nmedia.error.ApiError
-import ru.netology.nmedia.error.NetworkError
-import ru.netology.nmedia.error.UnknownError
-import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import java.io.File
 import java.io.IOException
@@ -52,7 +44,7 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             val token: Token
             try {
-                val response = PostsApi.retrofitService.login(login, pass)
+                val response = Api.retrofitService.login(login, pass)
 
                 if (!response.isSuccessful) {
                     _dataState.value = 1
@@ -77,7 +69,7 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             val token: Token
             try {
-                val response = PostsApi.retrofitService.register(login, pass, name)
+                val response = Api.retrofitService.register(login, pass, name)
 
                 if (!response.isSuccessful) {
                     _dataState.value = 1
@@ -103,7 +95,7 @@ class AuthViewModel : ViewModel() {
             val token: Token
             try {
                 val response = if (upload != null) {
-                    PostsApi.retrofitService.registerWithPhoto(
+                    Api.retrofitService.registerWithPhoto(
                         login.toRequestBody("text/plain".toMediaType()),
                         pass.toRequestBody("text/plain".toMediaType()),
                         name.toRequestBody("text/plain".toMediaType()),
@@ -112,7 +104,7 @@ class AuthViewModel : ViewModel() {
                         )
                     )
                 } else {
-                    PostsApi.retrofitService.register(login,pass,name)
+                    Api.retrofitService.register(login,pass,name)
                 }
 
                 if (!response.isSuccessful) {

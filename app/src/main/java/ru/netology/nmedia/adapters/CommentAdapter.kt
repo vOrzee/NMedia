@@ -67,7 +67,7 @@ class CommentViewHolder(
             like.text = NumberTranslator.translateNumber(comment.likes)
             like.isChecked = comment.likedByMe
             Glide.with(avatar)
-                .load(renameUrl(comment.authorAvatar ?: "","avatars"))
+                .load(renameUrl(comment.authorAvatar ?: "", "avatars"))
                 .placeholder(R.drawable.ic_image_not_supported_24)
                 .error(R.drawable.ic_not_avatars_24)
                 .circleCrop()

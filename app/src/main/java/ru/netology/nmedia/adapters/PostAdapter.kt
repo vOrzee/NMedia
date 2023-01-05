@@ -71,7 +71,7 @@ class PostViewHolder(
             view.text = NumberTranslator.translateNumber(post.countViews)
             view.isChecked = post.viewedByMe
             Glide.with(avatar)
-                .load(renameUrl(post.authorAvatar ?: "","avatars"))
+                .load(renameUrl(post.authorAvatar ?: "", "avatars"))
                 .placeholder(R.drawable.ic_image_not_supported_24)
                 .error(R.drawable.ic_not_avatars_24)
                 .circleCrop()
@@ -81,7 +81,7 @@ class PostViewHolder(
             if (post.attachment != null) {
                 attachmentContent.isVisible = true
                 Glide.with(imageAttachment)
-                    .load(renameUrl(post.attachment.url,"media"))
+                    .load(renameUrl(post.attachment.url, "media"))
                     .placeholder(R.drawable.not_image_1000)
                     .timeout(10_000)
                     .into(imageAttachment)

@@ -162,7 +162,8 @@ class PostFragment : Fragment() {
                             .timeout(10_000)
                             .into(imageAttachment)
                         descriptionAttachment.text = post.attachment.description
-                        playButtonVideoPost.isVisible = (post.attachment.type == AttachmentType.VIDEO)
+                        playButtonVideoPost.isVisible =
+                            (post.attachment.type == AttachmentType.VIDEO)
                     } else {
                         attachmentContent.visibility = View.GONE
                     }
@@ -224,7 +225,7 @@ class PostFragment : Fragment() {
                 }
             }
         }
-        val comments:MutableList<Comment> = mutableListOf()
+        val comments: MutableList<Comment> = mutableListOf()
         with(binding.listComment) {
             viewModel.data.observe(viewLifecycleOwner) { state ->
                 state.posts.find { it.id == arguments?.longArg }
