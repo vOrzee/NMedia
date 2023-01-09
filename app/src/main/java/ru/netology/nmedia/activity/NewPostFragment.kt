@@ -2,34 +2,27 @@ package ru.netology.nmedia.activity
 
 import android.app.Activity
 import android.net.Uri
-import android.opengl.Visibility
 import android.os.Bundle
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toFile
-import androidx.core.net.toUri
 import androidx.core.view.MenuProvider
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
-import ru.netology.nmedia.auxiliary.AndroidUtils
 import ru.netology.nmedia.auxiliary.AndroidUtils.hideKeyboard
-import ru.netology.nmedia.auxiliary.AndroidUtils.showKeyboard
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
-import ru.netology.nmedia.auxiliary.FloatingValue
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
 import ru.netology.nmedia.auxiliary.FloatingValue.textNewPost
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.viewmodel.PostViewModel
 
-
+@AndroidEntryPoint
 class NewPostFragment : Fragment() {
 
     private val binding by lazy { FragmentNewPostBinding.inflate(layoutInflater) }
