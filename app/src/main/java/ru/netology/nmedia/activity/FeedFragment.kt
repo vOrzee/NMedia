@@ -147,12 +147,17 @@ class FeedFragment : Fragment() {
             }
         }
 
+
         lifecycleScope.launchWhenCreated {
             adapter.loadStateFlow.collectLatest {
                 it.refresh is LoadState.Loading
                         || it.append is LoadState.Loading
                         || it.prepend is LoadState.Loading
             }
+        }
+
+        authViewModel.data.observe(viewLifecycleOwner) {
+            adapter.refresh()
         }
 
         viewModel.dataState.observe(viewLifecycleOwner) {
