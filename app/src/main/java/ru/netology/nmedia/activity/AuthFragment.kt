@@ -11,21 +11,20 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toFile
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import ru.netology.nmedia.R
-import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
-import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
 import ru.netology.nmedia.databinding.FragmentAuthBinding
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import kotlin.coroutines.EmptyCoroutineContext
 
+@AndroidEntryPoint
 class AuthFragment : Fragment() {
     private val binding by lazy { FragmentAuthBinding.inflate(layoutInflater) }
     private val viewModel: AuthViewModel by viewModels()
@@ -112,7 +111,6 @@ class AuthFragment : Fragment() {
         with(binding) {
 
             removePhoto.setOnClickListener {
-                //viewModel.deleteAttachment()
                 viewModel.changePhoto(null, null)
             }
             enterInSystem.setOnClickListener {

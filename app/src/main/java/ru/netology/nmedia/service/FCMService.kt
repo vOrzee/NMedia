@@ -4,22 +4,27 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auth.AuthState
+import javax.inject.Inject
 import kotlin.random.Random
 
+@AndroidEntryPoint
 class FCMService : FirebaseMessagingService() {
     private val action = "action"
     private val content = "content"
     private val channelId = "myChannel"
     private val gson = Gson()
+
+    @Inject
+    lateinit var appAuth: AppAuth
 
     override fun onCreate() {
         super.onCreate()
@@ -56,7 +61,7 @@ class FCMService : FirebaseMessagingService() {
         val  testInputPushValue = message.data.values.map {
             gson.fromJson(it, Test::class.java)
         }[0]
-        val myId = AppAuth.getInstance().authStateFlow.value.id
+        val myId = appAuth.authStateFlow.value.id
         when {
             testInputPushValue.recipientId == myId -> {
                 handleTestAction(testInputPushValue,"Персональная рассылка")
@@ -66,17 +71,17 @@ class FCMService : FirebaseMessagingService() {
             }
             testInputPushValue.recipientId == 0L  -> {
                 println("сервер считает, что у нас анонимная аутентификация, переотправляем токен")
-                AppAuth.getInstance().sendPushToken()
+                appAuth.sendPushToken()
             }
             testInputPushValue.recipientId != 0L -> {
                 println("сервер считает, что у на нашем устройстве другая аутентификация, переотправляем токен")
-                AppAuth.getInstance().sendPushToken()
+                appAuth.sendPushToken()
             }
         }
     }
 
     override fun onNewToken(token: String) {
-        AppAuth.getInstance().sendPushToken(token)
+        appAuth.sendPushToken(token)
     }
 
     private fun handleLike(content: Like) {

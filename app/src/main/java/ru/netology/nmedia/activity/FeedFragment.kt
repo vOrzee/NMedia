@@ -9,10 +9,14 @@ import android.widget.Toast
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.*
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapters.OnInteractionListener
@@ -21,20 +25,24 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 import ru.netology.nmedia.auxiliary.FloatingValue.currentFragment
-import ru.netology.nmedia.auxiliary.FloatingValue.showRegistrationDialog
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
+import javax.inject.Inject
 import kotlin.coroutines.EmptyCoroutineContext
 
 
+@AndroidEntryPoint
 class FeedFragment : Fragment() {
 
     val viewModel: PostViewModel by activityViewModels()
 
     val authViewModel: AuthViewModel by viewModels()
+
+    @Inject
+    lateinit var appAuth:AppAuth
 
 
     private val interactionListener = object : OnInteractionListener {
@@ -119,8 +127,8 @@ class FeedFragment : Fragment() {
         }
     }
 
-    lateinit var binding: FragmentFeedBinding
-    lateinit var adapter: PostAdapter
+    private lateinit var binding: FragmentFeedBinding
+    private lateinit var adapter: PostAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -133,9 +141,23 @@ class FeedFragment : Fragment() {
 
         binding.list.adapter = adapter
 
-        viewModel.data.observe(viewLifecycleOwner) {
-            adapter.submitList(it.posts)
-            binding.emptyText.isVisible = it.empty
+        lifecycleScope.launchWhenCreated {
+            viewModel.data.collectLatest {
+                adapter.submitData(it)
+            }
+        }
+
+
+        lifecycleScope.launchWhenCreated {
+            adapter.loadStateFlow.collectLatest {
+                it.refresh is LoadState.Loading
+                        || it.append is LoadState.Loading
+                        || it.prepend is LoadState.Loading
+            }
+        }
+
+        authViewModel.data.observe(viewLifecycleOwner) {
+            adapter.refresh()
         }
 
         viewModel.dataState.observe(viewLifecycleOwner) {
@@ -189,7 +211,7 @@ class FeedFragment : Fragment() {
                             AlertDialog.Builder(requireActivity())
                                 .setTitle(R.string.are_you_suare)
                                 .setPositiveButton(R.string.yes) { _, _ ->
-                                    AppAuth.getInstance().removeAuth()
+                                    appAuth.removeAuth()
                                 }
                                 .setCancelable(true)
                                 .setNegativeButton(R.string.no, null)
@@ -237,7 +259,7 @@ class FeedFragment : Fragment() {
         }
 
         binding.swipe.setOnRefreshListener {
-            viewModel.refreshPosts()
+            adapter.refresh()
         }
 
         binding.newerCount.setOnClickListener {
@@ -251,9 +273,9 @@ class FeedFragment : Fragment() {
             }
         }
 
-        viewModel.newerCount.observe(viewLifecycleOwner) { state ->
-            binding.newerCount.isVisible = state > 0
-        }
+//        viewModel.newerCount.observe(viewLifecycleOwner) { state ->
+//            binding.newerCount.isVisible = state > 0
+//        }
 
         return binding.root
     }

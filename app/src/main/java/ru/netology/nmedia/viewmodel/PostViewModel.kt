@@ -5,50 +5,42 @@ import android.net.Uri
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.lifecycle.*
+import androidx.paging.PagingData
+import androidx.paging.map
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import ru.netology.nmedia.BuildConfig.BASE_URL
-import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
-import ru.netology.nmedia.database.AppDbRoom
 import ru.netology.nmedia.dto.Comment
 import ru.netology.nmedia.dto.MediaUpload
 //import ru.netology.nmedia.database.AppDbRoom
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
+import javax.inject.Inject
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository : PostRepository = PostRepositoryImpl(
-        AppDbRoom.getInstance(application).postDaoRoom()
-    )
-    //private val _data = MutableLiveData(FeedModel())
-    val data: LiveData<FeedModel>
-        get() =  AppAuth.getInstance()
+@HiltViewModel
+class PostViewModel @Inject constructor(
+    application: Application,
+    private val repository: PostRepository,
+    private val appAuth: AppAuth
+) : AndroidViewModel(application) {
+    val data: Flow<PagingData<Post>>
+        get() = appAuth
             .authStateFlow
             .flatMapLatest { (myId, _) ->
                 repository.data
                     .map { posts ->
-                        FeedModel(
-                            posts.map { it.copy(ownedByMe = it.authorId == myId) },
-                            posts.isEmpty()
-                        )
+                            posts.map { it.copy(ownedByMe = it.authorId == myId) }
                     }
-            }.asLiveData(Dispatchers.Default)
-
-
-//            repository.data
-//            .map { FeedModel(it, it.isEmpty()) }
-//            .asLiveData(Dispatchers.Default)
+            }.flowOn(Dispatchers.Default)
 
     private val _dataState = MutableLiveData<FeedModelState>(FeedModelState.Idle)
     val dataState: LiveData<FeedModelState>
@@ -60,25 +52,27 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     val dataComment: LiveData<List<Comment>>
         get() = _dataComment
-    private val _dataComment:MutableLiveData<List<Comment>> = MutableLiveData(listOf())
+    private val _dataComment: MutableLiveData<List<Comment>> = MutableLiveData(listOf())
 
     private val _photo = MutableLiveData(
-        PhotoModel(edited.value?.attachment?.url?.toUri(), edited.value?.attachment?.url?.toUri()?.toFile())
-        ?: noPhoto
+        PhotoModel(
+            edited.value?.attachment?.url?.toUri(),
+            edited.value?.attachment?.url?.toUri()?.toFile()
+        )
+            ?: noPhoto
     )
     val photo: LiveData<PhotoModel>
         get() = _photo
 
-    val newerCount: LiveData<Int> = data.switchMap {
-        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
-            .catch { e -> e.printStackTrace() }
-            .asLiveData(Dispatchers.Default)
-    }
+//    val newerCount: LiveData<Int> = data.switchMap {
+//        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
+//            .catch { e -> e.printStackTrace() }
+//            .asLiveData(Dispatchers.Default)
+//    }
 
     fun changePhoto(uri: Uri?, file: File?) {
         _photo.value = PhotoModel(uri, file)
     }
-
 
     init {
         loadPosts()
@@ -133,6 +127,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
     fun shareById(id: Long) {//пока ничего
     }
 
@@ -174,7 +169,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _postCreated.value = Unit
             viewModelScope.launch {
                 try {
-                    when(_photo.value) {
+                    when (_photo.value) {
                         noPhoto -> repository.saveAsync(savingPost)
                         else -> _photo.value?.file?.let { file ->
                             repository.saveWithAttachment(savingPost, MediaUpload(file))
