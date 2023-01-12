@@ -30,7 +30,7 @@ interface OnInteractionListener {
 
 class PostAdapter(
     private val onInteractionListener: OnInteractionListener
-) : ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
+) : ListAdapter<Post,PostViewHolder>(PostDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding =
             FragmentCardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -55,7 +55,7 @@ class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
 
 class PostViewHolder(
     private val binding: FragmentCardPostBinding,
-    private val onInteractionListener: OnInteractionListener
+    private val onInteractionListener: OnInteractionListener,
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun renderingPostStructure(post: Post) {

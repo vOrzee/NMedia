@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.lifecycle.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
@@ -26,14 +27,16 @@ import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
+import javax.inject.Inject
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository : PostRepository = PostRepositoryImpl(
-        AppDbRoom.getInstance(application).postDaoRoom()
-    )
-    //private val _data = MutableLiveData(FeedModel())
+@HiltViewModel
+class PostViewModel @Inject constructor(
+    application: Application,
+    private val repository: PostRepository,
+    private val appAuth: AppAuth
+) : AndroidViewModel(application) {
     val data: LiveData<FeedModel>
-        get() =  AppAuth.getInstance()
+        get() = appAuth
             .authStateFlow
             .flatMapLatest { (myId, _) ->
                 repository.data
@@ -45,11 +48,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     }
             }.asLiveData(Dispatchers.Default)
 
-
-//            repository.data
-//            .map { FeedModel(it, it.isEmpty()) }
-//            .asLiveData(Dispatchers.Default)
-
     private val _dataState = MutableLiveData<FeedModelState>(FeedModelState.Idle)
     val dataState: LiveData<FeedModelState>
         get() = _dataState
@@ -60,11 +58,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     val dataComment: LiveData<List<Comment>>
         get() = _dataComment
-    private val _dataComment:MutableLiveData<List<Comment>> = MutableLiveData(listOf())
+    private val _dataComment: MutableLiveData<List<Comment>> = MutableLiveData(listOf())
 
     private val _photo = MutableLiveData(
-        PhotoModel(edited.value?.attachment?.url?.toUri(), edited.value?.attachment?.url?.toUri()?.toFile())
-        ?: noPhoto
+        PhotoModel(
+            edited.value?.attachment?.url?.toUri(),
+            edited.value?.attachment?.url?.toUri()?.toFile()
+        )
+            ?: noPhoto
     )
     val photo: LiveData<PhotoModel>
         get() = _photo
@@ -133,6 +134,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
     fun shareById(id: Long) {//пока ничего
     }
 
@@ -174,7 +176,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _postCreated.value = Unit
             viewModelScope.launch {
                 try {
-                    when(_photo.value) {
+                    when (_photo.value) {
                         noPhoto -> repository.saveAsync(savingPost)
                         else -> _photo.value?.file?.let { file ->
                             repository.saveWithAttachment(savingPost, MediaUpload(file))

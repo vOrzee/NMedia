@@ -5,9 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
-import android.widget.ListView
 import android.widget.PopupMenu
-import android.widget.SimpleAdapter
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -16,10 +14,9 @@ import androidx.fragment.app.viewModels
 import ru.netology.nmedia.R
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.adapters.CommentAdapter
-import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.adapters.OnInteractionListenerComment
-import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
 import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
@@ -33,8 +30,13 @@ import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class PostFragment : Fragment() {
+
+    @Inject
+    lateinit var appAuth: AppAuth
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -115,7 +117,7 @@ class PostFragment : Fragment() {
                             AlertDialog.Builder(requireActivity())
                                 .setTitle(R.string.are_you_suare)
                                 .setPositiveButton(R.string.yes) { _, _ ->
-                                    AppAuth.getInstance().removeAuth()
+                                    appAuth.removeAuth()
                                 }
                                 .setCancelable(true)
                                 .setNegativeButton(R.string.no, null)
@@ -225,17 +227,14 @@ class PostFragment : Fragment() {
                 }
             }
         }
-        val comments: MutableList<Comment> = mutableListOf()
-        with(binding.listComment) {
-            viewModel.data.observe(viewLifecycleOwner) { state ->
-                state.posts.find { it.id == arguments?.longArg }
-                    ?.let { viewModel.getCommentsById(it) }
-                //TODO пока комментарии только отображаются
-            }
+        viewModel.data.observe(viewLifecycleOwner) { state ->
+            state.posts.find { it.id == arguments?.longArg }
+                ?.let { viewModel.getCommentsById(it) }
+            //TODO пока комментарии только отображаются
+        }
 
-            viewModel.dataComment.observe(viewLifecycleOwner) {
-                adapter.submitList(it)
-            }
+        viewModel.dataComment.observe(viewLifecycleOwner) {
+            adapter.submitList(it)
         }
         return binding.root
     }
