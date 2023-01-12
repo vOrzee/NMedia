@@ -1,17 +1,20 @@
 package ru.netology.nmedia.repository
 
-import androidx.lifecycle.*
-import kotlinx.coroutines.Dispatchers
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.map
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.*
+import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.dao.*
+import ru.netology.nmedia.database.AppDbRoom
 import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
@@ -20,16 +23,26 @@ import ru.netology.nmedia.error.UnknownError
 import javax.inject.Inject
 
 
+@OptIn(ExperimentalPagingApi::class)
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDaoRoom,
-    private val apiService: ApiService
-    ) : PostRepository {
+    private val apiService: ApiService,
+    postRemoteKeyDao: PostRemoteKeyDao,
+    appDb: AppDbRoom,
+) : PostRepository {
 
     private val newerPostsId = mutableListOf<Long>()
 
-    override val data = dao.getAll()
-        .map(List<PostEntity>::toDto)
-        .flowOn(Dispatchers.Default)
+    override val data = Pager(
+        config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+        pagingSourceFactory = { dao.getPagingSource() },
+        remoteMediator = PostRemoteMediator(
+            apiService = apiService,
+            postDao = dao,
+            postRemoteKeyDao = postRemoteKeyDao,
+            appDb = appDb
+        )
+    ).flow.map { it.map(PostEntity::toDto) }
 
     override fun getNewerCount(id: Long): Flow<Int> = flow {
         while (true) {
@@ -75,6 +88,23 @@ class PostRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getById(id: Long): Post {
+        try {
+            val response = apiService.getById(id)
+
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            return response.body() ?: emptyPost
+
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
     override suspend fun removeByIdAsync(id: Long) {
         try {
             val response = apiService.removeById(id)
@@ -111,12 +141,14 @@ class PostRepositoryImpl @Inject constructor(
         try {
             val media = upload(upload)
             // TODO: add support for other types
-            val postWithAttachment = post.copy(attachment =
-            Attachment(
-                url = media.id,
-                type = AttachmentType.IMAGE,
-                description = null
-            ))
+            val postWithAttachment = post.copy(
+                attachment =
+                Attachment(
+                    url = media.id,
+                    type = AttachmentType.IMAGE,
+                    description = null
+                )
+            )
             saveAsync(postWithAttachment)
         } catch (e: AppError) {
             throw e
@@ -167,7 +199,7 @@ class PostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getCommentsById(post: Post) : List<Comment> {
+    override suspend fun getCommentsById(post: Post): List<Comment> {
         try {
             val response = apiService.getCommentsById(post.id)
 
