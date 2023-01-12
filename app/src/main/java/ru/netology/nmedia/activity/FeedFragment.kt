@@ -77,7 +77,7 @@ class FeedFragment : Fragment() {
         }
 
         override fun onShare(post: Post) {
-            viewModel.shareById(post.id)
+            //viewModel.shareById(post.id)
             val intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 type = "text/plain"
@@ -275,7 +275,7 @@ class FeedFragment : Fragment() {
 
         lifecycleScope.launchWhenStarted {
             //TODO проставить маркировку isNew в условиях Paging 3
-            viewModel.newerCount.collect { state ->
+            viewModel.newerCount.collectLatest { state ->
                 binding.newerCount.isVisible = state > 0
             }
         }

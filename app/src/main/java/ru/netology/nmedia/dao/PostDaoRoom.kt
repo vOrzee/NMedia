@@ -12,6 +12,9 @@ interface PostDaoRoom {
     @Query("SELECT * FROM PostEntity WHERE isNew = 0 ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
 
+    @Query("SELECT * FROM PostEntity WHERE id = :id")
+    fun getPostById(id: Long): PostEntity
+
     @Query("SELECT * FROM PostEntity WHERE isNew = 0 ORDER BY id DESC")
     fun getPagingSource(): PagingSource<Int, PostEntity>
 

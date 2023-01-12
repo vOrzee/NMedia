@@ -11,7 +11,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import ru.netology.nmedia.R
 import androidx.navigation.fragment.findNavController
@@ -19,7 +18,6 @@ import androidx.paging.filter
 import androidx.paging.map
 import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.adapters.CommentAdapter
 import ru.netology.nmedia.adapters.OnInteractionListenerComment
 import ru.netology.nmedia.auth.AppAuth
@@ -139,8 +137,8 @@ class PostFragment : Fragment() {
         }
         binding.listComment.adapter = adapter
         with(binding.singlePost) {
-            lifecycleScope.launchWhenCreated {
-                viewModel.data.collectLatest { state ->
+            lifecycleScope.launchWhenStarted {
+                viewModel.data.collect { state ->
                     val posts = state.filter { it.id == arguments?.longArg }
                     posts.map { post ->
                         title.text = post.author

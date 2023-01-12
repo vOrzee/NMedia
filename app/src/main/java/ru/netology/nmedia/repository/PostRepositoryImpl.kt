@@ -5,9 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.map
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
@@ -26,6 +24,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalPagingApi::class)
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDaoRoom,
+    private val daoKey: PostRemoteKeyDao,
     private val apiService: ApiService,
     postRemoteKeyDao: PostRemoteKeyDao,
     appDb: AppDbRoom,
@@ -44,16 +43,17 @@ class PostRepositoryImpl @Inject constructor(
         )
     ).flow.map { it.map(PostEntity::toDto) }
 
-    override fun getNewerCount(id: Long): Flow<Int> = flow {
+    override fun getNewerCount(): Flow<Int> = flow {
         while (true) {
             delay(10_000L)
-            val response = apiService.getNewer(id)
+            val response = apiService.getNewer(daoKey.max() ?: 0)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insert(body.toEntity(isNew = true))
+            daoKey.insert(PostRemoteKeyEntity(PostRemoteKeyEntity.KeyType.AFTER, body.last().id))
             body.forEach {
                 newerPostsId.add(it.id)
             }
@@ -88,22 +88,7 @@ class PostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getById(id: Long): Post {
-        try {
-            val response = apiService.getById(id)
 
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            return response.body() ?: emptyPost
-
-        } catch (e: IOException) {
-            throw NetworkError
-        } catch (e: Exception) {
-            throw UnknownError
-        }
-    }
 
     override suspend fun removeByIdAsync(id: Long) {
         try {
@@ -216,6 +201,8 @@ class PostRepositoryImpl @Inject constructor(
             throw UnknownError
         }
     }
+
+    override fun getById(id: Long) = dao.getPostById(id).toDto()
 
     override suspend fun edit(post: Post) {
         saveAsync(post)

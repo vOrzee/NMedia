@@ -9,6 +9,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -16,10 +17,8 @@ import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
-import ru.netology.nmedia.dao.PostRemoteKeyDao
 import ru.netology.nmedia.dto.Comment
 import ru.netology.nmedia.dto.MediaUpload
-//import ru.netology.nmedia.database.AppDbRoom
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
@@ -32,9 +31,9 @@ import javax.inject.Inject
 class PostViewModel @Inject constructor(
     application: Application,
     private val repository: PostRepository,
-    private val appAuth: AppAuth,
-    postRemoteKeyDao: PostRemoteKeyDao
+    private val appAuth: AppAuth
 ) : AndroidViewModel(application) {
+    @OptIn(ExperimentalCoroutinesApi::class)
     val data: Flow<PagingData<Post>>
         get() = appAuth
             .authStateFlow
@@ -57,39 +56,34 @@ class PostViewModel @Inject constructor(
         get() = _dataComment
     private val _dataComment: MutableLiveData<List<Comment>> = MutableLiveData(listOf())
 
+    val dataPost: LiveData<Post>
+        get() = _dataPost
+    private val _dataPost: MutableLiveData<Post> = MutableLiveData(emptyPost)
+
     private val _photo = MutableLiveData(
         PhotoModel(
             edited.value?.attachment?.url?.toUri(),
             edited.value?.attachment?.url?.toUri()?.toFile()
         )
-            ?: noPhoto
     )
     val photo: LiveData<PhotoModel>
         get() = _photo
 
-    private val lastPostId: Flow<Long> = flow {
-        val result = postRemoteKeyDao.max() ?: 0L
-        emit(result)
-    }
-
-    val newerCount =
-        lastPostId.flatMapLatest { id ->
-            repository.getNewerCount(id)
-                .catch { e -> e.printStackTrace() }
-                //.asLiveData(Dispatchers.Default)
-        }
-
-    fun changePhoto(uri: Uri?, file: File?) {
-        _photo.value = PhotoModel(uri, file)
-    }
+    val newerCount = repository.getNewerCount()
+        .catch { e -> e.printStackTrace() }
 
     init {
         loadPosts()
     }
 
+    fun changePhoto(uri: Uri?, file: File?) {
+        _photo.value = PhotoModel(uri, file)
+    }
+
     fun viewNewPosts() = viewModelScope.launch {
         try {
             repository.showNewPosts()
+            loadPosts()
             _dataState.value = FeedModelState.ShadowIdle
         } catch (e: Exception) {
             _dataState.value = FeedModelState.Error
@@ -126,6 +120,8 @@ class PostViewModel @Inject constructor(
         }
     }
 
+    fun getPostById(id: Long) = repository.getById(id)
+
     fun getCommentsById(post: Post) {
         viewModelScope.launch {
             try {
@@ -137,8 +133,7 @@ class PostViewModel @Inject constructor(
         }
     }
 
-    fun shareById(id: Long) {//пока ничего
-    }
+    //fun shareById(id: Long) {  }
 
     fun removeById(id: Long) {
         viewModelScope.launch {
@@ -159,7 +154,7 @@ class PostViewModel @Inject constructor(
         return edited.value?.id ?: 0
     }
 
-    fun getEditedPostImgRes(): String? {
+    fun getEditedPostImgRes(): String? { //todo
         return edited.value?.attachment?.url
     }
 
@@ -169,7 +164,7 @@ class PostViewModel @Inject constructor(
         edited.value = edited.value?.copy(content = text)
     }
 
-    fun deleteAttachment() {
+    fun deleteAttachment() { //todo
         edited.value = edited.value?.copy(attachment = null)
     }
 
