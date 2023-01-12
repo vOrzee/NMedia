@@ -160,6 +160,8 @@ class FeedFragment : Fragment() {
             adapter.refresh()
         }
 
+        binding.swipe.setOnRefreshListener(adapter::refresh)
+
         viewModel.dataState.observe(viewLifecycleOwner) {
             binding.progress.isVisible = it is FeedModelState.Loading
             binding.swipe.isRefreshing = it is FeedModelState.Refresh
@@ -256,10 +258,6 @@ class FeedFragment : Fragment() {
         }
         binding.retryButton.setOnClickListener {
             viewModel.loadPosts()
-        }
-
-        binding.swipe.setOnRefreshListener {
-            adapter.refresh()
         }
 
         binding.newerCount.setOnClickListener {

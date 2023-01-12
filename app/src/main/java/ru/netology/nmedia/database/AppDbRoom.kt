@@ -4,13 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import ru.netology.nmedia.dao.CommentEntity
-import ru.netology.nmedia.dao.PostDaoRoom
-import ru.netology.nmedia.dao.PostEntity
+import ru.netology.nmedia.dao.*
 
-@Database(entities = [PostEntity::class, CommentEntity::class], version = 1)
+@Database(entities = [PostEntity::class, CommentEntity::class, PostRemoteKeyEntity::class], version = 1)
 abstract class AppDbRoom : RoomDatabase() {
     abstract fun postDaoRoom(): PostDaoRoom
+    abstract fun postRemoteKeyDao(): PostRemoteKeyDao
 
     companion object {
         @Volatile
