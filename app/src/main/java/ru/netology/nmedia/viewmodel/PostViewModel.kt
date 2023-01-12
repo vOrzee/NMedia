@@ -12,9 +12,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
+import ru.netology.nmedia.dao.PostRemoteKeyDao
 import ru.netology.nmedia.dto.Comment
 import ru.netology.nmedia.dto.MediaUpload
 //import ru.netology.nmedia.database.AppDbRoom
@@ -30,7 +32,8 @@ import javax.inject.Inject
 class PostViewModel @Inject constructor(
     application: Application,
     private val repository: PostRepository,
-    private val appAuth: AppAuth
+    private val appAuth: AppAuth,
+    postRemoteKeyDao: PostRemoteKeyDao
 ) : AndroidViewModel(application) {
     val data: Flow<PagingData<Post>>
         get() = appAuth
@@ -64,11 +67,17 @@ class PostViewModel @Inject constructor(
     val photo: LiveData<PhotoModel>
         get() = _photo
 
-//    val newerCount: LiveData<Int> = data.switchMap {
-//        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
-//            .catch { e -> e.printStackTrace() }
-//            .asLiveData(Dispatchers.Default)
-//    }
+    private val lastPostId: Flow<Long> = flow {
+        val result = postRemoteKeyDao.max() ?: 0L
+        emit(result)
+    }
+
+    val newerCount =
+        lastPostId.flatMapLatest { id ->
+            repository.getNewerCount(id)
+                .catch { e -> e.printStackTrace() }
+                //.asLiveData(Dispatchers.Default)
+        }
 
     fun changePhoto(uri: Uri?, file: File?) {
         _photo.value = PhotoModel(uri, file)
@@ -97,10 +106,10 @@ class PostViewModel @Inject constructor(
         }
     }
 
-    fun refreshPosts() = viewModelScope.launch {
+    fun refreshPosts(adapter: PostAdapter) {
         try {
             _dataState.value = FeedModelState.Refresh
-            repository.getAllAsync()
+            adapter.refresh()
             _dataState.value = FeedModelState.ShadowIdle
         } catch (e: Exception) {
             _dataState.value = FeedModelState.Error

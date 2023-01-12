@@ -157,10 +157,12 @@ class FeedFragment : Fragment() {
         }
 
         authViewModel.data.observe(viewLifecycleOwner) {
-            adapter.refresh()
+            viewModel.refreshPosts(adapter)
         }
 
-        binding.swipe.setOnRefreshListener(adapter::refresh)
+        binding.swipe.setOnRefreshListener {
+            viewModel.refreshPosts(adapter)
+        }
 
         viewModel.dataState.observe(viewLifecycleOwner) {
             binding.progress.isVisible = it is FeedModelState.Loading
@@ -271,6 +273,12 @@ class FeedFragment : Fragment() {
             }
         }
 
+        lifecycleScope.launchWhenStarted {
+            //TODO проставить маркировку isNew в условиях Paging 3
+            viewModel.newerCount.collect { state ->
+                binding.newerCount.isVisible = state > 0
+            }
+        }
 //        viewModel.newerCount.observe(viewLifecycleOwner) { state ->
 //            binding.newerCount.isVisible = state > 0
 //        }
