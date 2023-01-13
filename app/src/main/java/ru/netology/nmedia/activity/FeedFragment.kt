@@ -12,7 +12,6 @@ import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.*
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -152,7 +151,8 @@ class FeedFragment : Fragment() {
             }),
             footer = PostLoadingStateAdapter(object : PostLoadingStateAdapter.OnInteractionListener {
                 override fun onRetry() {
-                    adapter.retry()
+                    adapter.refresh()
+
                 }
             }),
         )
@@ -287,8 +287,8 @@ class FeedFragment : Fragment() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
                     lifecycleScope.launch {
-                        delay(2_000)
-                        binding.newerCount.isVisible = false
+                        delay(3_000)
+                        binding.newerCount.visibility = View.GONE
                     }
                 }
             }

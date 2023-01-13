@@ -80,7 +80,7 @@ class PostViewModel @Inject constructor(
                 }
             )
         }
-        .cachedIn(viewModelScope)
+        //.cachedIn(viewModelScope)
 
     @RequiresApi(Build.VERSION_CODES.O)
     val data: Flow<PagingData<FeedItem>> = appAuth.authStateFlow
