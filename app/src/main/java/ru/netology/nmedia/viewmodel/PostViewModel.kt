@@ -75,13 +75,7 @@ class PostViewModel @Inject constructor(
                             else -> null
                         }
                     } else {
-                        if (prev is Post) {
-                            TimingSeparator(Random.nextLong(),"Предыдущий")
-                        } else if (next is Post) {
-                            TimingSeparator(Random.nextLong(), "Следующий")
-                        } else {
-                            TimingSeparator(Random.nextLong(), "Иначный")
-                        }
+                        null
                     }
                 }
             )
@@ -140,6 +134,7 @@ class PostViewModel @Inject constructor(
 
     fun viewNewPosts() = viewModelScope.launch {
         try {
+            newerCount.collectLatest { 0 }
             repository.showNewPosts()
             loadPosts()
             _dataState.value = FeedModelState.ShadowIdle

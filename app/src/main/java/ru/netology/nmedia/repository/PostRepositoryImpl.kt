@@ -1,6 +1,7 @@
 package ru.netology.nmedia.repository
 
 import androidx.paging.*
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import okhttp3.MultipartBody
@@ -16,6 +17,7 @@ import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import javax.inject.Inject
+import kotlin.properties.Delegates
 import kotlin.random.Random
 
 
@@ -46,21 +48,23 @@ class PostRepositoryImpl @Inject constructor(
 
     override fun getNewerCount(): Flow<Int> = flow {
         while (true) {
-            delay(10_000L)
             val response = apiService.getNewer(daoKey.max() ?: 0)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-//            dao.insert(body.toEntity(isNew = true))
-//            daoKey.insert(PostRemoteKeyEntity(PostRemoteKeyEntity.KeyType.AFTER, body.last().id))
             body.forEach {
                 newerPostsId.add(it.id)
             }
             emit(body.size)
+            delay(3_000L)
         }
     }
+
+
+//            dao.insert(body.toEntity(isNew = true))
+//            daoKey.insert(PostRemoteKeyEntity(PostRemoteKeyEntity.KeyType.AFTER, body.last().id))
 
     override suspend fun showNewPosts() {
         dao.showNewPosts()

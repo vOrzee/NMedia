@@ -3,15 +3,20 @@ package ru.netology.nmedia.activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.*
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -131,6 +136,7 @@ class FeedFragment : Fragment() {
     private lateinit var binding: FragmentFeedBinding
     private lateinit var adapter: PostAdapter
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -163,8 +169,6 @@ class FeedFragment : Fragment() {
         lifecycleScope.launchWhenCreated {
             adapter.loadStateFlow.collectLatest {
                 it.refresh is LoadState.Loading
-                        || it.append is LoadState.Loading
-                        || it.prepend is LoadState.Loading
             }
         }
 
@@ -276,25 +280,22 @@ class FeedFragment : Fragment() {
 
         binding.newerCount.setOnClickListener {
             binding.newerCount.isVisible = false
-            CoroutineScope(EmptyCoroutineContext).launch {
-                launch {
-                    viewModel.viewNewPosts()
-                    delay(25) // без delay прокручивает раньше, не смотря на join
-                }.join()
+                viewModel.refreshPosts(adapter)
                 binding.list.smoothScrollToPosition(0)
-            }
         }
 
         lifecycleScope.launchWhenStarted {
-            //TODO проставить маркировку isNew в условиях Paging 3
             viewModel.newerCount.collectLatest { state ->
-                binding.newerCount.isVisible = state > 0
+                binding.list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                        super.onScrolled(recyclerView, dx, dy)
+                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                        binding.newerCount.isVisible =
+                            layoutManager.findFirstCompletelyVisibleItemPosition() != 0 && state > 0
+                    }
+                })
             }
         }
-//        viewModel.newerCount.observe(viewLifecycleOwner) { state ->
-//            binding.newerCount.isVisible = state > 0
-//        }
-
         return binding.root
     }
 
