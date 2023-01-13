@@ -5,23 +5,20 @@ import android.net.Uri
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.lifecycle.*
+import androidx.paging.PagingData
+import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import ru.netology.nmedia.BuildConfig.BASE_URL
-import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
-import ru.netology.nmedia.database.AppDbRoom
 import ru.netology.nmedia.dto.Comment
 import ru.netology.nmedia.dto.MediaUpload
 //import ru.netology.nmedia.database.AppDbRoom
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.*
@@ -35,18 +32,15 @@ class PostViewModel @Inject constructor(
     private val repository: PostRepository,
     private val appAuth: AppAuth
 ) : AndroidViewModel(application) {
-    val data: LiveData<FeedModel>
+    val data: Flow<PagingData<Post>>
         get() = appAuth
             .authStateFlow
             .flatMapLatest { (myId, _) ->
                 repository.data
                     .map { posts ->
-                        FeedModel(
-                            posts.map { it.copy(ownedByMe = it.authorId == myId) },
-                            posts.isEmpty()
-                        )
+                            posts.map { it.copy(ownedByMe = it.authorId == myId) }
                     }
-            }.asLiveData(Dispatchers.Default)
+            }.flowOn(Dispatchers.Default)
 
     private val _dataState = MutableLiveData<FeedModelState>(FeedModelState.Idle)
     val dataState: LiveData<FeedModelState>
@@ -70,16 +64,15 @@ class PostViewModel @Inject constructor(
     val photo: LiveData<PhotoModel>
         get() = _photo
 
-    val newerCount: LiveData<Int> = data.switchMap {
-        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
-            .catch { e -> e.printStackTrace() }
-            .asLiveData(Dispatchers.Default)
-    }
+//    val newerCount: LiveData<Int> = data.switchMap {
+//        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
+//            .catch { e -> e.printStackTrace() }
+//            .asLiveData(Dispatchers.Default)
+//    }
 
     fun changePhoto(uri: Uri?, file: File?) {
         _photo.value = PhotoModel(uri, file)
     }
-
 
     init {
         loadPosts()
