@@ -18,24 +18,31 @@ object FloatingValue {
     fun renameUrl(nameResource: String, path: String, baseUrl: String = BuildConfig.BASE_URL): String {
         return "$baseUrl/$path/$nameResource"
     }
-    fun showRegistrationDialog(context:Context) {
-        AlertDialog.Builder(context)
-            .setTitle(R.string.action_not_allowed)
-            .setPositiveButton(R.string.sign_up) { _, _ ->
-                Bundle().apply {
-                    longArg = R.string.sign_up.toLong()
-                }
-            }
-            .setNeutralButton(R.string.sign_in) { _,_ ->
-                Bundle().apply {
-                    longArg = R.string.sign_in.toLong()
-                }
-            }
-            .setNegativeButton(R.string.no) { _,_ ->
 
-            }
-            .setCancelable(true)
-            .create()
-            .show()
+    fun agoToText(
+        timeInSecond: Int,
+        inLongAgoTextDescription:String,
+        inRecentlyTextDescription:String = inLongAgoTextDescription,
+        inYesterdayTextDescription:String = inRecentlyTextDescription,
+        inTodayTextDescription:String = inYesterdayTextDescription,
+        inHourTextDescription:String = inTodayTextDescription,
+        inMinuteTextDescription:String = inHourTextDescription,
+    ) = when (timeInSecond) {
+        in 0..60 -> inMinuteTextDescription
+        in 61..3600 -> inHourTextDescription
+        in 3601..86400 -> inTodayTextDescription
+        in 86401..172800 -> inYesterdayTextDescription
+        in 172801..259200 -> inRecentlyTextDescription
+        else -> inLongAgoTextDescription
+    }
+
+    private fun minuteOrHourToText(timeInSecond: Int, thisMinute: Boolean): String {
+        val divisor = if (thisMinute) 60 else 3600
+        if (timeInSecond / divisor in 5..20) return if (thisMinute) "минут" else "часов"
+        return when ((timeInSecond / divisor) % 10) {
+            1 -> if (thisMinute) "минуту" else "час"
+            in 2..4 -> if (thisMinute) "минуты" else "часа"
+            else -> "минут" //в случаях с часами этот вариант невозможен
+        }
     }
 }

@@ -53,8 +53,8 @@ class PostRepositoryImpl @Inject constructor(
             }
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            dao.insert(body.toEntity(isNew = true))
-            daoKey.insert(PostRemoteKeyEntity(PostRemoteKeyEntity.KeyType.AFTER, body.last().id))
+//            dao.insert(body.toEntity(isNew = true))
+//            daoKey.insert(PostRemoteKeyEntity(PostRemoteKeyEntity.KeyType.AFTER, body.last().id))
             body.forEach {
                 newerPostsId.add(it.id)
             }

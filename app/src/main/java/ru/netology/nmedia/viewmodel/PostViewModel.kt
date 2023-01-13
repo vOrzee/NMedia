@@ -2,13 +2,12 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.lifecycle.*
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.insertSeparators
-import androidx.paging.map
+import androidx.paging.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,12 +18,14 @@ import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
+import ru.netology.nmedia.auxiliary.FloatingValue.agoToText
 import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
+import java.time.OffsetDateTime.now
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -33,37 +34,73 @@ import kotlin.random.Random
 class PostViewModel @Inject constructor(
     application: Application,
     private val repository: PostRepository,
-    appAuth: AppAuth
+    appAuth: AppAuth,
 ) : AndroidViewModel(application) {
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private val cached: Flow<PagingData<FeedItem>> = repository
         .data
         .map { pagingData ->
             pagingData.insertSeparators(
-                generator = { before, _ ->
-                    if (before?.id?.rem(5) != 0L) null else
-                        Ad(
-                            Random.nextLong(),
-                            "figma.jpg"
+                generator = { prev, next ->
+                    val currentTime = now().toEpochSecond()
+                    if ((prev is Post && next is Post)) {
+                        val howOlderPrev = agoToText(
+                            (currentTime - prev.published.toLong()).toInt(),
+                            inLongAgoTextDescription = "Давно",
+                            inTodayTextDescription = "Сегодня",
+                            inHourTextDescription = "Не прошло и часа",
+                            inMinuteTextDescription = "Только что",
                         )
+                        val howOlderNext = agoToText(
+                            (currentTime - next.published.toLong()).toInt(),
+                            inLongAgoTextDescription = "Давно",
+                            inTodayTextDescription = "Сегодня",
+                            inHourTextDescription = "Не прошло и часа",
+                            inMinuteTextDescription = "Только что",
+                        )
+                        when {
+                            (howOlderPrev != howOlderNext) -> {
+                                TimingSeparator(
+                                    Random.nextLong(),
+                                    howOlderNext
+                                )
+                            }
+                            (prev.id.rem(5) == 0L) -> {
+                                Ad(
+                                    Random.nextLong(),
+                                    "figma.jpg"
+                                )
+                            }
+                            else -> null
+                        }
+                    } else {
+                        if (prev is Post) {
+                            TimingSeparator(Random.nextLong(),"Предыдущий")
+                        } else if (next is Post) {
+                            TimingSeparator(Random.nextLong(), "Следующий")
+                        } else {
+                            TimingSeparator(Random.nextLong(), "Иначный")
+                        }
+                    }
                 }
             )
         }
         .cachedIn(viewModelScope)
 
+    @RequiresApi(Build.VERSION_CODES.O)
     val data: Flow<PagingData<FeedItem>> = appAuth.authStateFlow
-            .flatMapLatest { (myId, _) ->
-                cached.map { pagingData ->
-                        pagingData.map { post ->
-                            if (post is Post) {
-                                post.copy(ownedByMe = post.authorId == myId)
-                            } else {
-                                post
-                            }
-
-                        }
+        .flatMapLatest { (myId, _) ->
+            cached.map { pagingData ->
+                pagingData.map { post ->
+                    if (post is Post) {
+                        post.copy(ownedByMe = post.authorId == myId)
+                    } else {
+                        post
                     }
-            }.flowOn(Dispatchers.Default)
+                }
+            }
+        }.flowOn(Dispatchers.Default)
 
     private val _dataState = MutableLiveData<FeedModelState>(FeedModelState.Idle)
     val dataState: LiveData<FeedModelState>

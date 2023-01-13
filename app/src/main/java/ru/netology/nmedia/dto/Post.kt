@@ -32,6 +32,11 @@ data class Ad(
     val image:String,
 ) : FeedItem
 
+data class TimingSeparator(
+    override val id:Long,
+    val text:String,
+) : FeedItem
+
 enum class AttachmentType {
     IMAGE,
     VIDEO

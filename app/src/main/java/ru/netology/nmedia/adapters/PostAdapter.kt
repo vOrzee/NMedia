@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
-import ru.netology.nmedia.dto.Post
 import android.view.View
 import android.widget.PopupMenu
 import androidx.core.view.isVisible
@@ -15,9 +14,8 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.auxiliary.FloatingValue.renameUrl
 import ru.netology.nmedia.auxiliary.NumberTranslator
 import ru.netology.nmedia.databinding.CardAdBinding
-import ru.netology.nmedia.dto.Ad
-import ru.netology.nmedia.dto.AttachmentType
-import ru.netology.nmedia.dto.FeedItem
+import ru.netology.nmedia.databinding.TimingSeparatorBinding
+import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.view.load
 import java.text.SimpleDateFormat
 import java.util.*
@@ -39,6 +37,7 @@ class PostAdapter(
         when (getItem(position)) {
             is Ad -> R.layout.card_ad
             is Post -> R.layout.fragment_card_post
+            is TimingSeparator -> R.layout.timing_separator
             null -> error("unknown view type")
         }
 
@@ -54,6 +53,11 @@ class PostAdapter(
                     CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 AdViewHolder(binding)
             }
+            R.layout.timing_separator -> {
+                val binding =
+                    TimingSeparatorBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                TimingSeparatorViewHolder(binding)
+            }
             else -> error("unknown view type: $viewType")
         }
 
@@ -64,6 +68,7 @@ class PostAdapter(
             is Ad -> (holder as? AdViewHolder)?.bind(item)
             is Post -> (holder as? PostViewHolder)?.bind(item)
             null -> error("unknown item type")
+            is TimingSeparator -> (holder as? TimingSeparatorViewHolder)?.bind(item)
         }
     }
 }
@@ -78,6 +83,15 @@ class PostDiffCallback : DiffUtil.ItemCallback<FeedItem>() {
 
     override fun areContentsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
         return oldItem == newItem
+    }
+}
+
+class TimingSeparatorViewHolder(
+    private val binding: TimingSeparatorBinding,
+) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(timingSeparator: TimingSeparator) {
+        binding.howOlder.text = timingSeparator.text
     }
 }
 
