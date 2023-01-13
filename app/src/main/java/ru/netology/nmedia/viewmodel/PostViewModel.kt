@@ -6,6 +6,8 @@ import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.lifecycle.*
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.insertSeparators
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,30 +19,49 @@ import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
-import ru.netology.nmedia.dto.Comment
-import ru.netology.nmedia.dto.MediaUpload
-import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
 import javax.inject.Inject
+import kotlin.random.Random
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class PostViewModel @Inject constructor(
     application: Application,
     private val repository: PostRepository,
-    private val appAuth: AppAuth
+    appAuth: AppAuth
 ) : AndroidViewModel(application) {
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val data: Flow<PagingData<Post>>
-        get() = appAuth
-            .authStateFlow
+
+    private val cached: Flow<PagingData<FeedItem>> = repository
+        .data
+        .map { pagingData ->
+            pagingData.insertSeparators(
+                generator = { before, _ ->
+                    if (before?.id?.rem(5) != 0L) null else
+                        Ad(
+                            Random.nextLong(),
+                            "figma.jpg"
+                        )
+                }
+            )
+        }
+        .cachedIn(viewModelScope)
+
+    val data: Flow<PagingData<FeedItem>> = appAuth.authStateFlow
             .flatMapLatest { (myId, _) ->
-                repository.data
-                    .map { posts ->
-                            posts.map { it.copy(ownedByMe = it.authorId == myId) }
+                cached.map { pagingData ->
+                        pagingData.map { post ->
+                            if (post is Post) {
+                                post.copy(ownedByMe = post.authorId == myId)
+                            } else {
+                                post
+                            }
+
+                        }
                     }
             }.flowOn(Dispatchers.Default)
 

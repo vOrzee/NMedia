@@ -3,7 +3,6 @@ package ru.netology.nmedia.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
 import ru.netology.nmedia.dto.Post
 import android.view.View
@@ -15,7 +14,11 @@ import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auxiliary.FloatingValue.renameUrl
 import ru.netology.nmedia.auxiliary.NumberTranslator
+import ru.netology.nmedia.databinding.CardAdBinding
+import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.AttachmentType
+import ru.netology.nmedia.dto.FeedItem
+import ru.netology.nmedia.view.load
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,26 +34,59 @@ interface OnInteractionListener {
 
 class PostAdapter(
     private val onInteractionListener: OnInteractionListener
-) : PagingDataAdapter<Post,PostViewHolder>(PostDiffCallback()) {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        val binding =
-            FragmentCardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(binding, onInteractionListener)
+) : PagingDataAdapter<FeedItem,RecyclerView.ViewHolder>(PostDiffCallback()) {
+    override fun getItemViewType(position: Int): Int =
+        when (getItem(position)) {
+            is Ad -> R.layout.card_ad
+            is Post -> R.layout.fragment_card_post
+            null -> error("unknown view type")
+        }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when(viewType) {
+            R.layout.fragment_card_post -> {
+                val binding =
+                    FragmentCardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                PostViewHolder(binding, onInteractionListener)
+            }
+            R.layout.card_ad -> {
+                val binding =
+                    CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                AdViewHolder(binding)
+            }
+            else -> error("unknown view type: $viewType")
+        }
+
     }
 
-    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position) ?: return
-        holder.renderingPostStructure(post)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when(val item = getItem(position)) {
+            is Ad -> (holder as? AdViewHolder)?.bind(item)
+            is Post -> (holder as? PostViewHolder)?.bind(item)
+            null -> error("unknown item type")
+        }
     }
 }
 
-class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
-    override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
+class PostDiffCallback : DiffUtil.ItemCallback<FeedItem>() {
+    override fun areItemsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
+        if (oldItem::class != newItem::class) {
+            return false
+        }
         return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
+    override fun areContentsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
         return oldItem == newItem
+    }
+}
+
+class AdViewHolder(
+    private val binding: CardAdBinding,
+) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(ad: Ad) {
+        binding.image.load(renameUrl(ad.image, "media"))
     }
 }
 
@@ -59,7 +95,7 @@ class PostViewHolder(
     private val onInteractionListener: OnInteractionListener,
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    fun renderingPostStructure(post: Post) {
+    fun bind(post: Post) {
         with(binding) {
             title.text = post.author
             datePublished.text = SimpleDateFormat("HH:mm:ss dd.MM.yyyy", Locale.ROOT)
@@ -124,15 +160,15 @@ class PostViewHolder(
             moreVert.setOnClickListener {
                 val popupMenu = PopupMenu(it.context, it)
                 popupMenu.apply {
-                    inflate(ru.netology.nmedia.R.menu.options_post)
+                    inflate(R.menu.options_post)
                     setOnMenuItemClickListener { item ->
                         when (item.itemId) {
-                            ru.netology.nmedia.R.id.remove -> {
+                            R.id.remove -> {
                                 moreVert.isChecked = false
                                 onInteractionListener.onRemove(post)
                                 true
                             }
-                            ru.netology.nmedia.R.id.edit -> {
+                            R.id.edit -> {
                                 moreVert.isChecked = false
                                 onInteractionListener.onEdit(post)
                                 true

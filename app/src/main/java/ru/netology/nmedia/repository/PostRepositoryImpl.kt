@@ -1,9 +1,6 @@
 package ru.netology.nmedia.repository
 
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.map
+import androidx.paging.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import okhttp3.MultipartBody
@@ -19,9 +16,10 @@ import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import javax.inject.Inject
+import kotlin.random.Random
 
 
-@OptIn(ExperimentalPagingApi::class)
+
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDaoRoom,
     private val daoKey: PostRemoteKeyDao,
@@ -32,7 +30,8 @@ class PostRepositoryImpl @Inject constructor(
 
     private val newerPostsId = mutableListOf<Long>()
 
-    override val data = Pager(
+    @OptIn(ExperimentalPagingApi::class)
+    override val data:Flow<PagingData<FeedItem>> = Pager(
         config = PagingConfig(pageSize = 10, enablePlaceholders = false),
         pagingSourceFactory = { dao.getPagingSource() },
         remoteMediator = PostRemoteMediator(
@@ -41,7 +40,9 @@ class PostRepositoryImpl @Inject constructor(
             postRemoteKeyDao = postRemoteKeyDao,
             appDb = appDb
         )
-    ).flow.map { it.map(PostEntity::toDto) }
+    ).flow.map { pagingData ->
+        pagingData.map(PostEntity::toDto)
+    }
 
     override fun getNewerCount(): Flow<Int> = flow {
         while (true) {

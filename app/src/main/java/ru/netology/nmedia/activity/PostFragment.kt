@@ -29,6 +29,7 @@ import ru.netology.nmedia.auxiliary.NumberTranslator.translateNumber
 import ru.netology.nmedia.databinding.FragmentPostBinding
 import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Comment
+import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 import java.text.SimpleDateFormat
@@ -141,6 +142,7 @@ class PostFragment : Fragment() {
                 viewModel.data.collect { state ->
                     val posts = state.filter { it.id == arguments?.longArg }
                     posts.map { post ->
+                        post as Post
                         title.text = post.author
                         datePublished.text =
                             SimpleDateFormat("HH:mm:ss dd.MM.yyyy", Locale.ROOT)
