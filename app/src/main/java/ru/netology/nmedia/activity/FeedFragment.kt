@@ -12,14 +12,13 @@ import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.*
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -37,7 +36,6 @@ import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 import javax.inject.Inject
-import kotlin.coroutines.EmptyCoroutineContext
 
 
 @AndroidEntryPoint
@@ -280,9 +278,21 @@ class FeedFragment : Fragment() {
 
         binding.newerCount.setOnClickListener {
             binding.newerCount.isVisible = false
-                viewModel.refreshPosts(adapter)
-                binding.list.smoothScrollToPosition(0)
+            viewModel.refreshPosts(adapter)
+            binding.list.smoothScrollToPosition(0)
         }
+
+        binding.list.addOnScrollListener ( //Скрываем плашку через 2 секунды после окончания скроллинга
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    lifecycleScope.launch {
+                        delay(2_000)
+                        binding.newerCount.isVisible = false
+                    }
+                }
+            }
+        )
 
         lifecycleScope.launchWhenStarted {
             viewModel.newerCount.collectLatest { state ->

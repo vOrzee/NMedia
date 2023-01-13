@@ -62,10 +62,6 @@ class PostRepositoryImpl @Inject constructor(
         }
     }
 
-
-//            dao.insert(body.toEntity(isNew = true))
-//            daoKey.insert(PostRemoteKeyEntity(PostRemoteKeyEntity.KeyType.AFTER, body.last().id))
-
     override suspend fun showNewPosts() {
         dao.showNewPosts()
     }
@@ -207,7 +203,10 @@ class PostRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getById(id: Long) = dao.getPostById(id).toDto()
+    override suspend fun getById(id: Long) : Post {
+        val result = apiService.getById(id)
+        return result.body() ?: emptyPost//dao.getPostById(id).toDto()
+    }
 
     override suspend fun edit(post: Post) {
         saveAsync(post)

@@ -108,9 +108,9 @@ class PostViewModel @Inject constructor(
         get() = _dataComment
     private val _dataComment: MutableLiveData<List<Comment>> = MutableLiveData(listOf())
 
-//    val dataPost: LiveData<Post>
-//        get() = _dataPost
-//    private val _dataPost: MutableLiveData<Post> = MutableLiveData(emptyPost)
+    val dataPost: LiveData<Post>
+        get() = _dataPost
+    private val _dataPost: MutableLiveData<Post> = MutableLiveData(emptyPost)
 
     private val _photo = MutableLiveData(
         PhotoModel(
@@ -230,8 +230,14 @@ class PostViewModel @Inject constructor(
         _photo.value = noPhoto
     }
 
-//    fun getPostById(id: Long) = repository.getById(id)
-
+    fun getPostById(id: Long) = viewModelScope.launch {
+        try {
+            _dataPost.value = repository.getById(id)
+            _dataState.value = FeedModelState.ShadowIdle
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState.Error
+        }
+    }
 //    fun shareById(id: Long) {  }
 
 //    fun getEditedPostImgRes(): String? { //todo
@@ -241,4 +247,4 @@ class PostViewModel @Inject constructor(
 //    fun deleteAttachment() { //todo
 //        edited.value = edited.value?.copy(attachment = null)
 //    }
-}
+    }

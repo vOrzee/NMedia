@@ -14,7 +14,7 @@ interface PostRepository {
     suspend fun edit(post: Post)
 
     suspend fun getAllAsync()
-    fun getById(id: Long) : Post
+    suspend fun getById(id: Long) : Post
     suspend fun removeByIdAsync(id: Long)
     suspend fun saveAsync(post: Post)
     suspend fun saveWithAttachment(post: Post, upload: MediaUpload)
