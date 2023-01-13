@@ -19,6 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
+import ru.netology.nmedia.adapter.PostLoadingStateAdapter
 import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auth.AppAuth
@@ -42,7 +43,7 @@ class FeedFragment : Fragment() {
     val authViewModel: AuthViewModel by viewModels()
 
     @Inject
-    lateinit var appAuth:AppAuth
+    lateinit var appAuth: AppAuth
 
 
     private val interactionListener = object : OnInteractionListener {
@@ -139,7 +140,18 @@ class FeedFragment : Fragment() {
         binding = FragmentFeedBinding.inflate(layoutInflater)
         adapter = PostAdapter(interactionListener)
 
-        binding.list.adapter = adapter
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = PostLoadingStateAdapter(object : PostLoadingStateAdapter.OnInteractionListener {
+                override fun onRetry() {
+                    adapter.retry()
+                }
+            }),
+            footer = PostLoadingStateAdapter(object : PostLoadingStateAdapter.OnInteractionListener {
+                override fun onRetry() {
+                    adapter.retry()
+                }
+            }),
+        )
 
         lifecycleScope.launchWhenCreated {
             viewModel.data.collectLatest {
