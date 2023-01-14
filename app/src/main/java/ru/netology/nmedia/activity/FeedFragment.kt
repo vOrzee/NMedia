@@ -52,7 +52,7 @@ class FeedFragment : Fragment() {
 
         override fun onLike(post: Post) {
             if (authViewModel.authenticated) {
-                viewModel.likeById(post)
+                viewModel.likeById(post.id,post.likedByMe)
             } else {
                 AlertDialog.Builder(context)
                     .setMessage(R.string.action_not_allowed)

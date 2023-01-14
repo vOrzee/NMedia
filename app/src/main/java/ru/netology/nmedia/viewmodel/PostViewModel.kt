@@ -63,7 +63,7 @@ class PostViewModel @Inject constructor(
                                     howOlderNext
                                 )
                             }
-                            (prev.id.rem(5) == 0L) -> {
+                            (prev.id.rem(15) == 0L) -> {
                                 Ad(
                                     Random.nextLong(),
                                     "figma.jpg"
@@ -77,7 +77,7 @@ class PostViewModel @Inject constructor(
                 }
             )
         }
-        //.cachedIn(viewModelScope)
+        .cachedIn(viewModelScope)
 
     val data: Flow<PagingData<FeedItem>> = appAuth.authStateFlow
         .flatMapLatest { (myId, _) ->
@@ -158,10 +158,10 @@ class PostViewModel @Inject constructor(
         }
     }
 
-    fun likeById(post: Post) {
+    fun likeById(id: Long, likedByMe: Boolean) {
         viewModelScope.launch {
             try {
-                repository.likeByIdAsync(post)
+                repository.likeByIdAsync(id,likedByMe)
             } catch (e: Exception) {
                 _dataState.value = FeedModelState.Error
             }

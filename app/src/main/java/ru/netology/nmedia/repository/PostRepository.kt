@@ -18,7 +18,7 @@ interface PostRepository {
     suspend fun removeByIdAsync(id: Long)
     suspend fun saveAsync(post: Post)
     suspend fun saveWithAttachment(post: Post, upload: MediaUpload)
-    suspend fun likeByIdAsync(post: Post)
+    suspend fun likeByIdAsync(id: Long, likedByMe: Boolean)
     suspend fun getCommentsById(post: Post) : List<Comment>
     suspend fun upload(upload: MediaUpload): Media
 }

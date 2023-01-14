@@ -34,7 +34,7 @@ class PostRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalPagingApi::class)
     override val data:Flow<PagingData<FeedItem>> = Pager(
-        config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+        config = PagingConfig(pageSize = 20, enablePlaceholders = true),
         pagingSourceFactory = { dao.getPagingSource() },
         remoteMediator = PostRemoteMediator(
             apiService = apiService,
@@ -164,14 +164,14 @@ class PostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun likeByIdAsync(post: Post) {
+    override suspend fun likeByIdAsync(id: Long, likedByMe: Boolean) {
         try {
-            val response = if (post.likedByMe) {
-                dao.likeById(post.id)
-                apiService.dislikeById(post.id)
+            val response = if (likedByMe) {
+                dao.likeById(id)
+                apiService.dislikeById(id)
             } else {
-                dao.likeById(post.id)
-                apiService.likeById(post.id)
+                dao.likeById(id)
+                apiService.likeById(id)
             }
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())

@@ -203,8 +203,7 @@ class PostFragment : Fragment() {
     private fun listeners(binding: FragmentPostBinding, post: Post) {
         with(binding.singlePost) {
             like.setOnClickListener {
-                like.isClickable = false //защита от повторного запроса
-                viewModel.likeById(post)
+                viewModel.likeById(post.id,post.likedByMe)
             }
 
             share.setOnClickListener {
