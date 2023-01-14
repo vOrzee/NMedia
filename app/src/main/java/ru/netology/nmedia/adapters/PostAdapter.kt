@@ -13,7 +13,6 @@ import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import kotlinx.coroutines.*
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auxiliary.FloatingValue.renameUrl
 import ru.netology.nmedia.auxiliary.NumberTranslator
@@ -164,6 +163,8 @@ class PostViewHolder(
     private val onInteractionListener: OnInteractionListener,
 ) : RecyclerView.ViewHolder(binding.root) {
 
+    lateinit var post: Post
+
     @SuppressLint("SetTextI18n")
     fun bind(payload: Payload) {
         payload.likes?.also { liked ->
@@ -187,7 +188,8 @@ class PostViewHolder(
         payload.content?.let(binding.content::setText)
     }
 
-    fun bind(post: Post) {
+    fun bind(postHolder: Post) {
+        post = postHolder.copy()
         with(binding) {
             title.text = post.author
             datePublished.text = SimpleDateFormat("HH:mm:ss dd.MM.yyyy", Locale.ROOT)
@@ -210,23 +212,24 @@ class PostViewHolder(
             if (post.attachment != null) {
                 attachmentContent.isVisible = true
                 Glide.with(imageAttachment)
-                    .load(renameUrl(post.attachment.url, "media"))
+                    .load(renameUrl(post.attachment!!.url, "media"))
                     .placeholder(R.drawable.not_image_1000)
                     .timeout(10_000)
                     .into(imageAttachment)
-                descriptionAttachment.text = post.attachment.description
-                playButtonVideoPost.isVisible = (post.attachment.type == AttachmentType.VIDEO)
+                descriptionAttachment.text = post.attachment!!.description
+                playButtonVideoPost.isVisible = (post.attachment!!.type == AttachmentType.VIDEO)
             } else {
                 attachmentContent.visibility = View.GONE
             }
-            postListeners(post)
+            postListeners()
         }
     }
 
-    private fun postListeners(post: Post) {
+    private fun postListeners() {
         with(binding) {
             like.setOnClickListener {
                 onInteractionListener.onLike(post)
+                post = post.copy(likedByMe = !post.likedByMe)
             }
             share.setOnClickListener {
                 share.text =
