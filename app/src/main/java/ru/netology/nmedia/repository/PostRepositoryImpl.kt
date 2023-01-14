@@ -165,13 +165,13 @@ class PostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun likeByIdAsync(post: Post) {
-        dao.likeById(post.id)
         try {
             val response = if (post.likedByMe) {
+                dao.likeById(post.id)
                 apiService.dislikeById(post.id)
             } else {
+                dao.likeById(post.id)
                 apiService.likeById(post.id)
-
             }
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())

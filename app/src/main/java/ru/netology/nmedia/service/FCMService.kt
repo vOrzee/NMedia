@@ -12,7 +12,6 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.auth.AuthState
 import javax.inject.Inject
 import kotlin.random.Random
 
