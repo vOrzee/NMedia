@@ -6,14 +6,12 @@ import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.lifecycle.*
 import androidx.paging.*
-import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import ru.netology.nmedia.R
 import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
@@ -81,19 +79,19 @@ class PostViewModel @Inject constructor(
         }
         .cachedIn(viewModelScope)
 
-    val data: Flow<PagingData<FeedItem>> = cached.flowOn(Dispatchers.Default)
-//        appAuth.authStateFlow
-//        .flatMapLatest { (myId, _) ->
-//            cached.map { pagingData -> pagingData
-//                pagingData.map { post ->
-//                    if (post is Post) {
-//                        post.copy(ownedByMe = post.authorId == myId)
-//                    } else {
-//                        post
-//                    }
-//                }
-//            }
-//        }.flowOn(Dispatchers.Default)
+    val data: Flow<PagingData<FeedItem>> =
+        appAuth.authStateFlow
+        .flatMapLatest { (myId, _) ->
+            cached.map { pagingData ->
+                pagingData.map { post ->
+                    if (post is Post) {
+                        post.copy(ownedByMe = post.authorId == myId)
+                    } else {
+                        post
+                    }
+                }
+            }
+        }.flowOn(Dispatchers.Default)
 
     private val _dataState = MutableLiveData<FeedModelState>(FeedModelState.Idle)
     val dataState: LiveData<FeedModelState>
