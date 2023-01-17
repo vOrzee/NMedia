@@ -1,16 +1,6 @@
 package ru.netology.nmedia.auxiliary
 
-import android.app.AlertDialog
-import android.content.Context
-import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.navigation.Navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.BuildConfig
-import ru.netology.nmedia.R
-import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.auxiliary.Companion.Companion.longArg
-import ru.netology.nmedia.auxiliary.Companion.Companion.textArg
 
 object FloatingValue {
     var textNewPost = ""

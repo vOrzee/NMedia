@@ -21,15 +21,11 @@ class PostRemoteMediator(
         try {
             val response = when (loadType) {
                 LoadType.REFRESH -> {
-                    postRemoteKeyDao.max()?.let {
-                        apiService.getAfter(it, state.config.pageSize)
+                    postRemoteKeyDao.max()?.let { id ->
+                        apiService.getAfter(id, state.config.pageSize)
                     } ?: apiService.getLatest(state.config.initialLoadSize)
                 }
                 LoadType.PREPEND -> {
-                    val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(
-                        endOfPaginationReached = false
-                    )
-                    //apiService.getAfter(id, state.config.pageSize)
                     return MediatorResult.Success(
                         endOfPaginationReached = true
                     )
@@ -53,28 +49,27 @@ class PostRemoteMediator(
             appDb.withTransaction {
                 when (loadType) {
                     LoadType.REFRESH -> {
-                        postRemoteKeyDao.clear()
-                        postRemoteKeyDao.insert(
-                            listOf(
+                        if(postRemoteKeyDao.max() == null) {
+                            postRemoteKeyDao.insert(
+                                listOf(
+                                    PostRemoteKeyEntity(
+                                        type = PostRemoteKeyEntity.KeyType.AFTER,
+                                        idPost = body.first().id,
+                                    ),
+                                    PostRemoteKeyEntity(
+                                        type = PostRemoteKeyEntity.KeyType.BEFORE,
+                                        idPost = body.last().id,
+                                    ),
+                                )
+                            )
+                        } else {
+                            postRemoteKeyDao.insert(
                                 PostRemoteKeyEntity(
                                     type = PostRemoteKeyEntity.KeyType.AFTER,
                                     idPost = body.first().id,
-                                ),
-                                PostRemoteKeyEntity(
-                                    type = PostRemoteKeyEntity.KeyType.BEFORE,
-                                    idPost = body.last().id,
-                                ),
+                                )
                             )
-                        )
-                        postDao.clear()
-                    }
-                    LoadType.PREPEND -> {
-                        postRemoteKeyDao.insert(
-                            PostRemoteKeyEntity(
-                                type = PostRemoteKeyEntity.KeyType.AFTER,
-                                idPost = body.first().id,
-                            )
-                        )
+                        }
                     }
                     LoadType.APPEND -> {
                         postRemoteKeyDao.insert(
@@ -83,6 +78,9 @@ class PostRemoteMediator(
                                 idPost = body.last().id,
                             )
                         )
+                    }
+                    else -> {
+                        //do nothing
                     }
                 }
                 postDao.insert(body.toEntity())

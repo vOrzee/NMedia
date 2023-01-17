@@ -52,4 +52,5 @@
     <string name="back">Назад</string>
     <string name="hint_enter_name">Имя</string>
     <string name="ad_description">Ad description</string>
+    <string name="for_a_long_time_separator">For a long time</string>
 </resources>
