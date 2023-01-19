@@ -3,22 +3,26 @@ package ru.netology.nmedia.activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.*
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
+import ru.netology.nmedia.adapter.PostLoadingStateAdapter
 import ru.netology.nmedia.adapters.OnInteractionListener
 import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auth.AppAuth
@@ -31,7 +35,6 @@ import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 import javax.inject.Inject
-import kotlin.coroutines.EmptyCoroutineContext
 
 
 @AndroidEntryPoint
@@ -42,14 +45,14 @@ class FeedFragment : Fragment() {
     val authViewModel: AuthViewModel by viewModels()
 
     @Inject
-    lateinit var appAuth:AppAuth
+    lateinit var appAuth: AppAuth
 
 
     private val interactionListener = object : OnInteractionListener {
 
         override fun onLike(post: Post) {
             if (authViewModel.authenticated) {
-                viewModel.likeById(post)
+                viewModel.likeById(post.id,post.likedByMe)
             } else {
                 AlertDialog.Builder(context)
                     .setMessage(R.string.action_not_allowed)
@@ -77,7 +80,7 @@ class FeedFragment : Fragment() {
         }
 
         override fun onShare(post: Post) {
-            viewModel.shareById(post.id)
+            //viewModel.shareById(post.id)
             val intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 type = "text/plain"
@@ -139,7 +142,19 @@ class FeedFragment : Fragment() {
         binding = FragmentFeedBinding.inflate(layoutInflater)
         adapter = PostAdapter(interactionListener)
 
-        binding.list.adapter = adapter
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = PostLoadingStateAdapter(object : PostLoadingStateAdapter.OnInteractionListener {
+                override fun onRetry() {
+                    adapter.retry()
+                }
+            }),
+            footer = PostLoadingStateAdapter(object : PostLoadingStateAdapter.OnInteractionListener {
+                override fun onRetry() {
+                    adapter.refresh()
+
+                }
+            }),
+        )
 
         lifecycleScope.launchWhenCreated {
             viewModel.data.collectLatest {
@@ -151,13 +166,15 @@ class FeedFragment : Fragment() {
         lifecycleScope.launchWhenCreated {
             adapter.loadStateFlow.collectLatest {
                 it.refresh is LoadState.Loading
-                        || it.append is LoadState.Loading
-                        || it.prepend is LoadState.Loading
             }
         }
 
         authViewModel.data.observe(viewLifecycleOwner) {
-            adapter.refresh()
+            viewModel.refreshPosts(adapter)
+        }
+
+        binding.swipe.setOnRefreshListener {
+            viewModel.refreshPosts(adapter)
         }
 
         viewModel.dataState.observe(viewLifecycleOwner) {
@@ -258,25 +275,36 @@ class FeedFragment : Fragment() {
             viewModel.loadPosts()
         }
 
-        binding.swipe.setOnRefreshListener {
-            adapter.refresh()
-        }
-
         binding.newerCount.setOnClickListener {
             binding.newerCount.isVisible = false
-            CoroutineScope(EmptyCoroutineContext).launch {
-                launch {
-                    viewModel.viewNewPosts()
-                    delay(25) // без delay прокручивает раньше, не смотря на join
-                }.join()
-                binding.list.smoothScrollToPosition(0)
-            }
+            viewModel.refreshPosts(adapter)
+            binding.list.smoothScrollToPosition(0)
         }
 
-//        viewModel.newerCount.observe(viewLifecycleOwner) { state ->
-//            binding.newerCount.isVisible = state > 0
-//        }
+        binding.list.addOnScrollListener ( //Скрываем плашку через 2 секунды после окончания скроллинга
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    lifecycleScope.launch {
+                        delay(3_000)
+                        binding.newerCount.visibility = View.GONE
+                    }
+                }
+            }
+        )
 
+        lifecycleScope.launchWhenStarted {
+            viewModel.newerCount.collectLatest { state ->
+                binding.list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                        super.onScrolled(recyclerView, dx, dy)
+                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                        binding.newerCount.isVisible =
+                            layoutManager.findFirstCompletelyVisibleItemPosition() != 0 && state > 0
+                    }
+                })
+            }
+        }
         return binding.root
     }
 

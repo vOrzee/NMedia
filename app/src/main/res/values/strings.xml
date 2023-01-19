@@ -51,4 +51,6 @@
     <string name="action_not_allowed">Action not allowed for anonym</string>
     <string name="back">Back</string>
     <string name="hint_enter_name">Name</string>
+    <string name="ad_description">Ad description</string>
+    <string name="for_a_long_time_separator">For a long time</string>
 </resources>

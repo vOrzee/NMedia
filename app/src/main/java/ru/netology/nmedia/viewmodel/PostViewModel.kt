@@ -5,42 +5,93 @@ import android.net.Uri
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.lifecycle.*
-import androidx.paging.PagingData
-import androidx.paging.map
+import androidx.paging.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ru.netology.nmedia.adapters.PostAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auxiliary.ConstantValues.emptyPost
 import ru.netology.nmedia.auxiliary.ConstantValues.noPhoto
-import ru.netology.nmedia.dto.Comment
-import ru.netology.nmedia.dto.MediaUpload
-//import ru.netology.nmedia.database.AppDbRoom
-import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.auxiliary.FloatingValue.agoToText
+import ru.netology.nmedia.dto.*
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
+import java.time.OffsetDateTime.now
 import javax.inject.Inject
+import kotlin.random.Random
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class PostViewModel @Inject constructor(
     application: Application,
     private val repository: PostRepository,
-    private val appAuth: AppAuth
+    appAuth: AppAuth,
 ) : AndroidViewModel(application) {
-    val data: Flow<PagingData<Post>>
-        get() = appAuth
-            .authStateFlow
-            .flatMapLatest { (myId, _) ->
-                repository.data
-                    .map { posts ->
-                            posts.map { it.copy(ownedByMe = it.authorId == myId) }
+
+    private val cached: Flow<PagingData<FeedItem>> = repository
+        .data
+        .map { pagingData ->
+            pagingData.insertSeparators(
+                generator = { prev, next ->
+                    val currentTime = now().toEpochSecond()
+                    if ((prev is Post && next is Post)) {
+                        val howOlderPrev = agoToText(
+                            (currentTime - prev.published.toLong()).toInt(),
+                            inLongAgoTextDescription = "Давно",
+                            inTodayTextDescription = "Сегодня",
+                            inHourTextDescription = "Не прошло и часа",
+                            inMinuteTextDescription = "Только что",
+                        )
+                        val howOlderNext = agoToText(
+                            (currentTime - next.published.toLong()).toInt(),
+                            inLongAgoTextDescription = "Давно",
+                            inTodayTextDescription = "Сегодня",
+                            inHourTextDescription = "Не прошло и часа",
+                            inMinuteTextDescription = "Только что",
+                        )
+                        when {
+                            (howOlderPrev != howOlderNext) -> {
+                                TimingSeparator(
+                                    Random.nextLong(),
+                                    howOlderNext
+                                )
+                            }
+                            (prev.id.rem(15) == 0L) -> {
+                                Ad(
+                                    Random.nextLong(),
+                                    "figma.jpg"
+                                )
+                            }
+                            else -> null
+                        }
+                    } else {
+                        null
                     }
-            }.flowOn(Dispatchers.Default)
+                }
+            )
+        }
+        .cachedIn(viewModelScope)
+
+    val data: Flow<PagingData<FeedItem>> =
+        appAuth.authStateFlow
+        .flatMapLatest { (myId, _) ->
+            cached.map { pagingData ->
+                pagingData.map { post ->
+                    if (post is Post) {
+                        post.copy(ownedByMe = post.authorId == myId)
+                    } else {
+                        post
+                    }
+                }
+            }
+        }.flowOn(Dispatchers.Default)
 
     private val _dataState = MutableLiveData<FeedModelState>(FeedModelState.Idle)
     val dataState: LiveData<FeedModelState>
@@ -54,33 +105,34 @@ class PostViewModel @Inject constructor(
         get() = _dataComment
     private val _dataComment: MutableLiveData<List<Comment>> = MutableLiveData(listOf())
 
+    val dataPost: LiveData<Post>
+        get() = _dataPost
+    private val _dataPost: MutableLiveData<Post> = MutableLiveData(emptyPost)
+
     private val _photo = MutableLiveData(
         PhotoModel(
             edited.value?.attachment?.url?.toUri(),
             edited.value?.attachment?.url?.toUri()?.toFile()
         )
-            ?: noPhoto
     )
     val photo: LiveData<PhotoModel>
         get() = _photo
 
-//    val newerCount: LiveData<Int> = data.switchMap {
-//        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
-//            .catch { e -> e.printStackTrace() }
-//            .asLiveData(Dispatchers.Default)
-//    }
-
-    fun changePhoto(uri: Uri?, file: File?) {
-        _photo.value = PhotoModel(uri, file)
-    }
+    val newerCount = repository.getNewerCount()
+        .catch { e -> e.printStackTrace() }
 
     init {
         loadPosts()
     }
 
+    fun changePhoto(uri: Uri?, file: File?) {
+        _photo.value = PhotoModel(uri, file)
+    }
+
     fun viewNewPosts() = viewModelScope.launch {
         try {
             repository.showNewPosts()
+            loadPosts()
             _dataState.value = FeedModelState.ShadowIdle
         } catch (e: Exception) {
             _dataState.value = FeedModelState.Error
@@ -97,20 +149,20 @@ class PostViewModel @Inject constructor(
         }
     }
 
-    fun refreshPosts() = viewModelScope.launch {
+    fun refreshPosts(adapter: PostAdapter) {
         try {
             _dataState.value = FeedModelState.Refresh
-            repository.getAllAsync()
+            adapter.refresh()
             _dataState.value = FeedModelState.ShadowIdle
         } catch (e: Exception) {
             _dataState.value = FeedModelState.Error
         }
     }
 
-    fun likeById(post: Post) {
+    fun likeById(id: Long, likedByMe: Boolean) {
         viewModelScope.launch {
             try {
-                repository.likeByIdAsync(post)
+                repository.likeByIdAsync(id,likedByMe)
             } catch (e: Exception) {
                 _dataState.value = FeedModelState.Error
             }
@@ -126,9 +178,6 @@ class PostViewModel @Inject constructor(
                 _dataState.value = FeedModelState.Error
             }
         }
-    }
-
-    fun shareById(id: Long) {//пока ничего
     }
 
     fun removeById(id: Long) {
@@ -150,18 +199,10 @@ class PostViewModel @Inject constructor(
         return edited.value?.id ?: 0
     }
 
-    fun getEditedPostImgRes(): String? {
-        return edited.value?.attachment?.url
-    }
-
     fun changeContent(content: String) {
         val text = content.trim()
         if (edited.value?.content == text) return
         edited.value = edited.value?.copy(content = text)
-    }
-
-    fun deleteAttachment() {
-        edited.value = edited.value?.copy(attachment = null)
     }
 
     fun save() {
@@ -184,4 +225,22 @@ class PostViewModel @Inject constructor(
         edited.value = emptyPost
         _photo.value = noPhoto
     }
-}
+
+    fun getPostById(id: Long) = viewModelScope.launch {
+        try {
+            _dataPost.value = repository.getById(id)
+            _dataState.value = FeedModelState.ShadowIdle
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState.Error
+        }
+    }
+//    fun shareById(id: Long) {  }
+
+//    fun getEditedPostImgRes(): String? { //todo
+//        return edited.value?.attachment?.url
+//    }
+
+//    fun deleteAttachment() { //todo
+//        edited.value = edited.value?.copy(attachment = null)
+//    }
+    }

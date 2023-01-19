@@ -1,5 +1,6 @@
 package ru.netology.nmedia.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -10,6 +11,12 @@ import kotlinx.coroutines.flow.Flow
 interface PostDaoRoom {
     @Query("SELECT * FROM PostEntity WHERE isNew = 0 ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
+
+    @Query("SELECT * FROM PostEntity WHERE id = :id")
+    suspend fun getPostById(id: Long): PostEntity
+
+    @Query("SELECT * FROM PostEntity WHERE isNew = 0 ORDER BY id DESC")
+    fun getPagingSource(): PagingSource<Int, PostEntity>
 
     @Query(
         """
@@ -64,5 +71,8 @@ interface PostDaoRoom {
         """
     )
     fun shareById(id: Long)
+
+    @Query("DELETE FROM PostEntity")
+    suspend fun clear()
 
 }

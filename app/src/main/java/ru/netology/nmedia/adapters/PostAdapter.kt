@@ -1,11 +1,12 @@
 package ru.netology.nmedia.adapters
 
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import ru.netology.nmedia.databinding.FragmentCardPostBinding
-import ru.netology.nmedia.dto.Post
 import android.view.View
 import android.widget.PopupMenu
 import androidx.core.view.isVisible
@@ -15,7 +16,10 @@ import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auxiliary.FloatingValue.renameUrl
 import ru.netology.nmedia.auxiliary.NumberTranslator
-import ru.netology.nmedia.dto.AttachmentType
+import ru.netology.nmedia.databinding.CardAdBinding
+import ru.netology.nmedia.databinding.TimingSeparatorBinding
+import ru.netology.nmedia.dto.*
+import ru.netology.nmedia.view.load
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,26 +35,126 @@ interface OnInteractionListener {
 
 class PostAdapter(
     private val onInteractionListener: OnInteractionListener
-) : PagingDataAdapter<Post,PostViewHolder>(PostDiffCallback()) {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        val binding =
-            FragmentCardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(binding, onInteractionListener)
+) : PagingDataAdapter<FeedItem,RecyclerView.ViewHolder>(PostDiffCallback()) {
+
+
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+        } else {
+            payloads.forEach {
+                if (holder is PostViewHolder) {
+                    if (it is Payload) {
+                        holder.bind(it)
+                    }
+                }
+            }
+        }
     }
 
-    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position) ?: return
-        holder.renderingPostStructure(post)
+    override fun getItemViewType(position: Int): Int =
+        when (getItem(position)) {
+            is Ad -> R.layout.card_ad
+            is Post -> R.layout.fragment_card_post
+            is TimingSeparator -> R.layout.timing_separator
+            null -> error("unknown view type")
+        }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when(viewType) {
+            R.layout.fragment_card_post -> {
+                val binding =
+                    FragmentCardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                PostViewHolder(binding, onInteractionListener)
+            }
+            R.layout.card_ad -> {
+                val binding =
+                    CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                AdViewHolder(binding)
+            }
+            R.layout.timing_separator -> {
+                val binding =
+                    TimingSeparatorBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                TimingSeparatorViewHolder(binding)
+            }
+            else -> error("unknown view type: $viewType")
+        }
+
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when(val item = getItem(position)) {
+            is Ad -> (holder as? AdViewHolder)?.bind(item)
+            is Post -> (holder as? PostViewHolder)?.bind(item)
+            null -> error("unknown item type")
+            is TimingSeparator -> (holder as? TimingSeparatorViewHolder)?.bind(item)
+        }
     }
 }
 
-class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
-    override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
+data class Payload(
+    val likes:LikePlayLoad? = null,
+    val content:String? = null,
+    val attachment: Attachment? = null,
+    val image:String? = null,
+)
+
+data class LikePlayLoad(
+    val likes:Int,
+    val likedByMe:Boolean,
+)
+
+class PostDiffCallback : DiffUtil.ItemCallback<FeedItem>() {
+    override fun areItemsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
+        if (oldItem::class != newItem::class) {
+            return false
+        }
         return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
+    override fun areContentsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
         return oldItem == newItem
+    }
+
+    override fun getChangePayload(oldItem: FeedItem, newItem: FeedItem): Any? {
+        return when {
+            (oldItem is Post && newItem is Post) ->
+                Payload(
+                    likes = if (newItem.likes != oldItem.likes)
+                                LikePlayLoad(newItem.likes, newItem.likedByMe)
+                            else null,
+                    content = newItem.content.takeIf { it != oldItem.content},
+                    attachment = newItem.attachment.takeIf { it != oldItem.attachment},
+                )
+            (oldItem is Ad && newItem is Ad) ->
+                Payload(
+                    image = newItem.image.takeIf { it != oldItem.image},
+                )
+            else -> null
+        }
+    }
+
+}
+
+class TimingSeparatorViewHolder(
+    private val binding: TimingSeparatorBinding,
+) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(timingSeparator: TimingSeparator) {
+        binding.howOlder.text = timingSeparator.text
+    }
+}
+
+class AdViewHolder(
+    private val binding: CardAdBinding,
+) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(ad: Ad) {
+        binding.image.load(renameUrl(ad.image, "media"))
     }
 }
 
@@ -59,7 +163,33 @@ class PostViewHolder(
     private val onInteractionListener: OnInteractionListener,
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    fun renderingPostStructure(post: Post) {
+    lateinit var post: Post
+
+    @SuppressLint("SetTextI18n")
+    fun bind(payload: Payload) {
+        payload.likes?.also { liked ->
+            if (!liked.likedByMe) {
+                binding.like.text = (payload.likes.likes).toString()
+                ObjectAnimator.ofFloat(
+                    binding.like,
+                    View.ROTATION,
+                    0F, 360F
+                ).start()
+            } else {
+                binding.like.text = (payload.likes.likes).toString()
+                ObjectAnimator.ofPropertyValuesHolder(
+                    binding.like,
+                    PropertyValuesHolder.ofFloat(View.SCALE_X, 1.0F, 1.2F, 1.0F, 1.2F),
+                    PropertyValuesHolder.ofFloat(View.SCALE_Y, 1.0F, 1.2F, 1.0F, 1.2F)
+                ).start()
+            }
+            binding.like.isChecked = liked.likedByMe
+        }
+        payload.content?.let(binding.content::setText)
+    }
+
+    fun bind(postHolder: Post) {
+        post = postHolder.copy()
         with(binding) {
             title.text = post.author
             datePublished.text = SimpleDateFormat("HH:mm:ss dd.MM.yyyy", Locale.ROOT)
@@ -82,25 +212,24 @@ class PostViewHolder(
             if (post.attachment != null) {
                 attachmentContent.isVisible = true
                 Glide.with(imageAttachment)
-                    .load(renameUrl(post.attachment.url, "media"))
+                    .load(renameUrl(post.attachment!!.url, "media"))
                     .placeholder(R.drawable.not_image_1000)
                     .timeout(10_000)
                     .into(imageAttachment)
-                descriptionAttachment.text = post.attachment.description
-                playButtonVideoPost.isVisible = (post.attachment.type == AttachmentType.VIDEO)
+                descriptionAttachment.text = post.attachment!!.description
+                playButtonVideoPost.isVisible = (post.attachment!!.type == AttachmentType.VIDEO)
             } else {
                 attachmentContent.visibility = View.GONE
             }
-            postListeners(post)
+            postListeners()
         }
     }
 
-    private fun postListeners(post: Post) {
+    private fun postListeners() {
         with(binding) {
             like.setOnClickListener {
-                //like.isClickable = false //защита от повторного запроса
-                like.isChecked = !like.isChecked //Инвертируем нажатие
                 onInteractionListener.onLike(post)
+                post = post.copy(likedByMe = !post.likedByMe)
             }
             share.setOnClickListener {
                 share.text =
@@ -124,15 +253,15 @@ class PostViewHolder(
             moreVert.setOnClickListener {
                 val popupMenu = PopupMenu(it.context, it)
                 popupMenu.apply {
-                    inflate(ru.netology.nmedia.R.menu.options_post)
+                    inflate(R.menu.options_post)
                     setOnMenuItemClickListener { item ->
                         when (item.itemId) {
-                            ru.netology.nmedia.R.id.remove -> {
+                            R.id.remove -> {
                                 moreVert.isChecked = false
                                 onInteractionListener.onRemove(post)
                                 true
                             }
-                            ru.netology.nmedia.R.id.edit -> {
+                            R.id.edit -> {
                                 moreVert.isChecked = false
                                 onInteractionListener.onEdit(post)
                                 true
